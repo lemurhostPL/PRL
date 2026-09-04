@@ -12,14 +12,15 @@
      ZMIENNE KOLORÓW I STYLU
      ============================================ */
   :root{
-    --tlo: #141210;
-    --tlo-karta: #1c1a17;
-    --tlo-karta-jasniej: #242119;
-    --linia: #322c22;
+    --tlo: #0f0e0d;
+    --tlo-karta: #181614;
+    --tlo-karta-jasniej: #221f1b;
+    --linia: #2f2a22;
+    --linia-jasna: #423b30;
     --czerwien: #b5152b;
-    --czerwien-jasna: #d81e3a;
+    --czerwien-jasna: #e6203c;
     --zloto: #c9a84c;
-    --zloto-jasne: #e3c878;
+    --zloto-jasne: #f0d278;
     --tekst: #ede7d9;
     --tekst-przygaszony: #9a9284;
     --zielony: #4caf6d;
@@ -29,6 +30,11 @@
 
   body{
     background: var(--tlo);
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(181, 21, 43, 0.15), transparent 50%),
+      linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+    background-size: 100% 100%, 30px 30px, 30px 30px;
     color: var(--tekst);
     font-family: 'PT Sans', sans-serif;
     line-height: 1.55;
@@ -54,10 +60,9 @@
   .naglowek{
     position: relative;
     text-align: center;
-    padding: 56px 20px 40px;
+    padding: 60px 20px 40px;
     border-bottom: 3px solid var(--czerwien);
-    background:
-      linear-gradient(180deg, rgba(181,21,43,0.10), transparent 70%);
+    background: linear-gradient(180deg, rgba(181,21,43,0.18), transparent 85%);
     overflow: hidden;
   }
 
@@ -70,39 +75,42 @@
   }
 
   .gwiazda{
-    font-size: 28px;
+    font-size: 32px;
     color: var(--zloto);
     display: block;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 12px rgba(201, 168, 76, 0.5);
   }
 
   .naglowek-tytul{
-    font-size: clamp(28px, 5vw, 44px);
+    font-size: clamp(28px, 5vw, 46px);
     font-weight: 700;
     color: var(--tekst);
     text-transform: uppercase;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
   }
 
   .naglowek-podtytul{
-    margin-top: 10px;
+    margin-top: 8px;
     font-size: clamp(14px, 2.4vw, 17px);
     color: var(--zloto-jasne);
     font-family: 'Oswald', sans-serif;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
   .status-serwera{
-    margin-top: 26px;
+    margin-top: 24px;
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 18px;
+    padding: 8px 20px;
     background: var(--tlo-karta);
-    border: 1px solid var(--linia);
+    border: 1px solid var(--linia-jasna);
     border-radius: 999px;
     font-size: 14px;
     color: var(--tekst-przygaszony);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   }
 
   .kropka-status{
@@ -110,7 +118,7 @@
     height: 10px;
     border-radius: 50%;
     background: var(--zielony);
-    box-shadow: 0 0 8px var(--zielony);
+    box-shadow: 0 0 10px var(--zielony);
     flex-shrink: 0;
   }
 
@@ -118,7 +126,7 @@
      SEKCJE OGÓLNE
      ============================================ */
   .sekcja{
-    margin-top: 48px;
+    margin-top: 40px;
   }
 
   .sekcja-tytul{
@@ -127,9 +135,12 @@
     color: var(--zloto);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--linia);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .siatka{
@@ -148,19 +159,26 @@
   .karta{
     background: var(--tlo-karta);
     border: 1px solid var(--linia);
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 24px;
     position: relative;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .karta:hover{
+    transform: translateY(-2px);
+    border-color: var(--linia-jasna);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   }
 
   .karta::before{
     content: "";
     position: absolute;
     top: 0; left: 0;
-    width: 3px;
+    width: 4px;
     height: 100%;
     background: var(--czerwien);
-    border-radius: 6px 0 0 6px;
+    border-radius: 8px 0 0 8px;
   }
 
   .karta-naglowek{
@@ -181,7 +199,7 @@
 
   .karta-imie{
     font-family: 'Oswald', sans-serif;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 600;
     color: var(--tekst);
   }
@@ -200,7 +218,7 @@
 
   .licznik-dni strong{
     color: var(--zloto-jasne);
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .pasek-tlo{
@@ -216,7 +234,8 @@
     height: 100%;
     background: linear-gradient(90deg, var(--czerwien), var(--zloto));
     border-radius: 999px;
-    transition: width 0.6s ease;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px rgba(201, 168, 76, 0.3);
   }
 
   .pasek-podpis{
@@ -233,8 +252,8 @@
   .karta-prawna{
     background: var(--tlo-karta);
     border: 1px solid var(--linia);
-    border-radius: 6px;
-    padding: 26px;
+    border-radius: 8px;
+    padding: 24px;
   }
 
   .karta-prawna-wiersz{
@@ -268,7 +287,7 @@
   .lista-odznaczen{
     background: var(--tlo-karta);
     border: 1px solid var(--linia);
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
   }
 
@@ -279,12 +298,15 @@
     align-items: center;
     padding: 16px 22px;
     border-bottom: 1px solid var(--linia);
+    transition: background 0.2s ease;
   }
+
+  .odznaczenie:hover{ background: var(--tlo-karta-jasniej); }
 
   .odznaczenie:last-child{ border-bottom: none; }
 
   .odznaczenie-brak{
-    padding: 24px 22px;
+    padding: 28px 22px;
     text-align: center;
     color: var(--tekst-przygaszony);
     font-size: 14px;
@@ -323,6 +345,122 @@
   }
 
   /* ============================================
+     ZAKŁADKI
+     ============================================ */
+  .zakladki{
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+    padding: 0 20px;
+  }
+
+  .zakladka{
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 24px;
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia);
+    border-radius: 6px;
+    color: var(--tekst-przygaszony);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .zakladka:hover{
+    color: var(--tekst);
+    border-color: var(--zloto);
+  }
+
+  .zakladka.aktywna{
+    background: linear-gradient(135deg, var(--czerwien), var(--czerwien-jasna));
+    border-color: var(--czerwien-jasna);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(181, 21, 43, 0.4);
+  }
+
+  .tresc-zakladki{ display: none; }
+  .tresc-zakladki.aktywna{ display: block; }
+
+  /* ============================================
+     KONSTYTUCJA & WYSZUKIWARKA
+     ============================================ */
+  .szukaj-konstytucja{
+    width: 100%;
+    padding: 12px 18px;
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia-jasna);
+    border-radius: 6px;
+    color: var(--tekst);
+    font-family: 'PT Sans', sans-serif;
+    font-size: 14px;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .szukaj-konstytucja:focus{
+    border-color: var(--zloto);
+  }
+
+  .konst-rozdzial{
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+
+  .konst-rozdzial:hover{
+    border-color: var(--linia-jasna);
+  }
+
+  .konst-rozdzial summary{
+    padding: 16px 20px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--zloto-jasne);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    list-style: none;
+  }
+
+  .konst-rozdzial summary::-webkit-details-marker{ display: none; }
+
+  .konst-rozdzial summary::before{
+    content: "▸";
+    display: inline-block;
+    margin-right: 10px;
+    color: var(--czerwien-jasna);
+    transition: transform 0.2s ease;
+  }
+
+  .konst-rozdzial[open] summary::before{
+    transform: rotate(90deg);
+  }
+
+  .konst-tresc{
+    padding: 4px 22px 20px;
+    border-top: 1px solid var(--linia);
+  }
+
+  .konst-tresc p{
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--tekst);
+  }
+
+  .konst-tresc p strong{
+    color: var(--zloto);
+  }
+
+  /* ============================================
      STOPKA
      ============================================ */
   .stopka{
@@ -348,7 +486,14 @@
     </div>
   </header>
 
+  <nav class="zakladki">
+    <button class="zakladka aktywna" data-zakladka="main" onclick="przelaczZakladke('main')">Panel Główny</button>
+    <button class="zakladka" data-zakladka="konstytucja" onclick="przelaczZakladke('konstytucja')">Konstytucja</button>
+  </nav>
+
   <div class="kontener">
+
+  <div id="tab-main" class="tresc-zakladki aktywna">
 
     <!-- KADENCJE -->
     <section class="sekcja">
@@ -424,10 +569,156 @@
       </div>
     </section>
 
+  </div>
+  <!-- /tab-main -->
+
+  <!-- ZAKŁADKA: KONSTYTUCJA -->
+  <div id="tab-konstytucja" class="tresc-zakladki">
+    <section class="sekcja" style="margin-top: 20px;">
+      <div class="sekcja-tytul">Konstytucja PRL — z dnia 30 sierpnia 2026 roku</div>
+
+      <input type="text" id="szukajKonst" class="szukaj-konstytucja" placeholder="Szukaj w artykule lub temacie (np. wybory, ZOMO, ustawa)..." onkeyup="filtrujKonstytucje()">
+
+      <div id="listaRozdzialow">
+        <details class="konst-rozdzial">
+          <summary>1. Postanowienia ogólne</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Serwer oficjalnie jest świecki.</p>
+            <p><strong>Art. 2.</strong> Na serwerze oficjalnie panuje ustrój jednopartyjny.</p>
+            <p><strong>Art. 3.</strong> Hymnem serwera jest: Międzynarodówka (tymczasowo).</p>
+            <p><strong>Art. 4.</strong> Każdy ma równe prawa i każdy równo ponosi konsekwencje swoich zachowań.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>2. Członkostwo w Partii</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Jedno miejsce w partii przypada na pięciu członków z rangą towarzysza.</p>
+            <p><strong>Art. 2.</strong> Członkowie mogą: a) proponować ustawy, b) głosować w sprawie ustaw, c) kandydować na I Sekretarza, d) awansować do ZOMO i Administracji.</p>
+            <p><strong>Art. 3.</strong> Członków mianuje I Sekretarz.</p>
+            <p><strong>Art. 4.</strong> Członków może odwołać I Sekretarz lub ponad ⅔ członków partii w wyniku głosowania.</p>
+            <p><strong>Art. 5.</strong> Aby ubiegać się o stanowisko członka partii trzeba: a) być na serwerze minimum tydzień, b) nie być członkiem opozycji, c) być choć trochę aktywną osobą.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>3. I Sekretarz</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Kadencja I Sekretarza trwa 2 miesiące.</p>
+            <p><strong>Art. 2.</strong> I Sekretarz może zrezygnować w każdej chwili.</p>
+            <p><strong>Art. 3.</strong> I Sekretarz jest wybierany w wyborach ogólnoserwerowych.</p>
+            <p><strong>Art. 4.</strong> I Sekretarz jest zobowiązany do: a) organizowania głosowań nad poszczególnymi wnioskami, b) wprowadzania zmian za pośrednictwem administracji, c) koordynowania pracy administracji.</p>
+            <p><strong>Art. 5.</strong> I Sekretarz może dowolnie wymieniać członków partii spełniających wymagania z art. 5 rozdziału II oraz może dokonać maksymalnie 3 zmian dziennie.</p>
+            <p><strong>Art. 6.</strong> I Sekretarz nie może sam mianować się administratorem.</p>
+            <p><strong>Art. 7.</strong> Jeśli I Sekretarz nie jest pewny podjęcia decyzji lub chce, by zdecydował lud, może zorganizować referendum ogólnoserwerowe (referendum nie może dotyczyć ustawy ani zmiany konstytucji).</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>4. II Sekretarz</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> II Sekretarza mianuje I Sekretarz jako swojego zastępcę.</p>
+            <p><strong>Art. 2.</strong> Gdy I Sekretarz jest nieobecny, II Sekretarz zajmuje jego pozycję do czasu powrotu I Sekretarza.</p>
+            <p><strong>Art. 3.</strong> Gdy I Sekretarz zrezygnuje, II Sekretarz automatycznie staje się I Sekretarzem i wybiera nowego zastępcę.</p>
+            <p><strong>Art. 4.</strong> I Sekretarz nie może zmienić II Sekretarza przez 20 dni od jego wyboru.</p>
+            <p><strong>Art. 5.</strong> II Sekretarz jest zobowiązany do: a) koordynowania pracy ZOMO, b) pilnowania, by regulamin był przestrzegany na serwerze.</p>
+            <p><strong>Art. 6.</strong> II Sekretarz nie może sam mianować się członkiem ZOMO.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>5. ZOMO</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> ZOMO powołuje II Sekretarz po objęciu stanowiska.</p>
+            <p><strong>Art. 2.</strong> ZOMO mogą zostać tylko członkowie partii.</p>
+            <p><strong>Art. 3.</strong> ZOMO jest zobowiązane do: a) pilnowania przestrzegania regulaminu, b) tworzenia ankiet min. raz na 2 tygodnie.</p>
+            <p><strong>Art. 4.</strong> Jeśli członek ZOMO będzie nadużywać swoich uprawnień, może dostać karę bez ostrzeżenia.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>6. Administracja</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Administrację powołuje I Sekretarz na początku swojej kadencji.</p>
+            <p><strong>Art. 2.</strong> Administratorami mogą zostać tylko członkowie partii.</p>
+            <p><strong>Art. 3.</strong> Administracja jest zobowiązana do: a) wprowadzania przegłosowanych ustaw i wniosków, b) wykonywania poleceń I Sekretarza.</p>
+            <p><strong>Art. 4.</strong> Jeśli członek administracji będzie nadużywać swoich uprawnień, może dostać karę bez ostrzeżenia lub, gdy przewinienia będą poważne, może zostać zastosowany ban.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>7. Założyciel Serwera</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Założyciel serwera jest jednocześnie prezesem banku.</p>
+            <p><strong>Art. 2.</strong> Założyciel serwera nie może zostać I ani II Sekretarzem.</p>
+            <p><strong>Art. 3.</strong> Kiedy założyciel widzi łamanie konstytucji/regulaminu, może od razu zastosować karę.</p>
+            <p><strong>Art. 4.</strong> Jeśli założyciel serwera zauważy, że władza stwarza zagrożenie zniszczenia serwera lub jego mocnego osłabienia, może ją usunąć — musi jednak mieć do tego powód.</p>
+            <p><strong>Art. 5.</strong> Założyciel serwera klasyfikuje ustawy, wnioski i zmiany konstytucji.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>8. Ustawy i Wnioski</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Ustawy i wnioski mogą składać wyłącznie członkowie partii i opozycji.</p>
+            <p><strong>Art. 2.</strong> Wnioski są rozpatrywane przez I Sekretarza bez głosowań.</p>
+            <p><strong>Art. 3.</strong> Złożona ustawa musi najpierw zostać sprawdzona pod kątem zgodności z konstytucją i sklasyfikowana jako ustawa przez założyciela serwera, a dopiero potem dopuszczona do głosowania.</p>
+            <p><strong>Art. 4.</strong> Gdy ustawa jest dopuszczona do głosowania, I Sekretarz organizuje 24-godzinne głosowanie, w którym wygrywa opcja zaznaczona przez większość członków partii.</p>
+            <p><strong>Art. 5.</strong> W sytuacji remisu w głosowaniu I Sekretarz podejmuje decyzję, czy ustawa przeszła.</p>
+            <p><strong>Art. 6.</strong> Gdy ustawa przejdzie głosowanie, I Sekretarz może ją przyjąć i wdrożyć najszybciej jak to możliwe lub zawetować i cofnąć do głosowania, gdzie aby przejść, musi uzyskać ponad 2/3 głosów.</p>
+            <p><strong>Art. 7.</strong> Wniosek to: 1) zgłoszenie nieprawidłowego zachowania administracji, ZOMO, I lub II Sekretarza lub innego członka serwera, 2) propozycja małej zmiany (np. zmiana nazwy kanału, dodanie emotki, naklejki itp.).</p>
+            <p><strong>Art. 8.</strong> Ustawa to propozycja większych zmian dotyczących regulaminu, ekonomii, dodania nowego kanału, nowego bota itp.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>9. Wybory</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Wybory na I Sekretarza organizuje założyciel serwera.</p>
+            <p><strong>Art. 2.</strong> O stanowisko I Sekretarza mogą ubiegać się tylko członkowie partii.</p>
+            <p><strong>Art. 3.</strong> Kandydaci muszą umieścić swoje programy wyborcze na odpowiednim kanale w określony dzień, inaczej zostaną usunięci z kandydatury.</p>
+            <p><strong>Art. 4.</strong> Gdy kandydat w I turze dostanie więcej niż 50% głosów, wygrywa wybory automatycznie.</p>
+            <p><strong>Art. 5.</strong> Gdy w I turze jest remis uniemożliwiający organizację II tury z 2 kandydatami, organizowana jest przejściowa II tura, która decyduje o tym, kto przejdzie do III tury.</p>
+            <p><strong>Art. 6.</strong> Jeśli kandydat zrezygnuje w trakcie wyborów, jego głosy są nieważne już od I tury, co może całkowicie odwrócić bieg wyborów.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>10. Order Orła Czerwonego</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Order Orła Czerwonego to najwyższe odznaczenie na serwerze.</p>
+            <p><strong>Art. 2.</strong> Order Orła Czerwonego może nadawać tylko założyciel serwera za szczególne i uzasadnione zasługi, jednak na nadanie muszą wyrazić zgodę I i II Sekretarz.</p>
+            <p><strong>Art. 3.</strong> Order Orła Czerwonego może zostać odebrany tylko wtedy, gdy zgodzą się na to Założyciel oraz I i II Sekretarz.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>11. Zmiana Konstytucji</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Propozycje zmiany konstytucji mogą złożyć tylko członkowie partii i opozycji.</p>
+            <p><strong>Art. 2.</strong> Po sklasyfikowaniu propozycji jako zmiany konstytucji przez założyciela serwera, I Sekretarz jest zobowiązany zorganizować głosowanie, w którym potrzeba powyżej 4/5 głosów za, by zmiana przeszła — wtedy I Sekretarz nie może jej zawetować, a zmiana wchodzi w życie od następnego poniedziałku po przyjęciu.</p>
+          </div>
+        </details>
+
+        <details class="konst-rozdzial">
+          <summary>12. Przepisy Końcowe</summary>
+          <div class="konst-tresc">
+            <p><strong>Art. 1.</strong> Konstytucja zaczyna obowiązywać na serwerach PRL 3 i nowszych (jeśli takie będą) od 01.09.2026 r.</p>
+            <p><strong>Art. 2.</strong> Do aktualizacji konstytucji mają dostęp tylko Maloy i Krzychu Bluetesowicz.</p>
+          </div>
+        </details>
+      </div>
+
+    </section>
+  </div>
+  <!-- /tab-konstytucja -->
+
+  </div>
+
+  <div class="kontener">
     <div class="stopka">
       Rzeczpospolita PRL — Panel odświeżany automatycznie na żywo
     </div>
-
   </div>
 
 <script>
@@ -451,7 +742,6 @@
   const statusPrawnyAktywny     = true; // true = "W mocy", false = "Zawieszona"
 
   // --- REJESTR ODZNACZEŃ ---
-  // Dodaj kolejny wpis kopiując linijkę { ... } poniżej
   const listaOdznaczonychObywateli = [];
 
   /* ============================================================
@@ -484,6 +774,40 @@
       dane.zakonczona ? "Trwają wybory" : dane.pozostalo + " dni do końca";
 
     return dane;
+  }
+
+  function przelaczZakladke(nazwa){
+    document.querySelectorAll(".tresc-zakladki").forEach(function(el){
+      el.classList.remove("aktywna");
+    });
+    document.querySelectorAll(".zakladka").forEach(function(el){
+      el.classList.remove("aktywna");
+    });
+    document.getElementById("tab-" + nazwa).classList.add("aktywna");
+    document.querySelector('.zakladka[data-zakladka="' + nazwa + '"]').classList.add("aktywna");
+  }
+
+  function filtrujKonstytucje() {
+    const zapytanie = document.getElementById("szukajKonst").value.toLowerCase();
+    const rozdzialy = document.querySelectorAll(".konst-rozdzial");
+
+    rozdzialy.forEach(function(rozdzial) {
+      const tekst = rozdzial.innerText.toLowerCase();
+      if (tekst.includes(zapytanie)) {
+        rozdzial.style.display = "block";
+        if (zapytanie.length > 2) {
+          rozdzial.open = true;
+        }
+      } else {
+        rozdzial.style.display = "none";
+      }
+    });
+
+    if (zapytanie === "") {
+      rozdzialy.forEach(function(rozdzial) {
+        rozdzial.open = false;
+      });
+    }
   }
 
   function odswiezPanel(){
@@ -530,10 +854,9 @@
   odswiezPanel();
   zbudujListeOdznaczen();
 
-  // Odświeżanie licznika co minutę (dzień się zmienia raz dziennie, ale to trzyma dane na żywo)
+  // Odświeżanie licznika co minutę
   setInterval(odswiezPanel, 60000);
 </script>
 
 </body>
 </html>
-

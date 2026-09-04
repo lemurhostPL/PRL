@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Informacyjny — Serwer PRL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================
+     ZMIENNE KOLORÓW I STYLU
+     ============================================ */
+  :root{
+    --tlo: #141210;
+    --tlo-karta: #1c1a17;
+    --tlo-karta-jasniej: #242119;
+    --linia: #322c22;
+    --czerwien: #b5152b;
+    --czerwien-jasna: #d81e3a;
+    --zloto: #c9a84c;
+    --zloto-jasne: #e3c878;
+    --tekst: #ede7d9;
+    --tekst-przygaszony: #9a9284;
+    --zielony: #4caf6d;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    background: var(--tlo);
+    color: var(--tekst);
+    font-family: 'PT Sans', sans-serif;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .naglowek-tytul{
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.02em;
+  }
+
+  a{ color: var(--zloto); }
+
+  .kontener{
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* ============================================
+     NAGŁÓWEK
+     ============================================ */
+  .naglowek{
+    position: relative;
+    text-align: center;
+    padding: 56px 20px 40px;
+    border-bottom: 3px solid var(--czerwien);
+    background:
+      linear-gradient(180deg, rgba(181,21,43,0.10), transparent 70%);
+    overflow: hidden;
+  }
+
+  .naglowek::before{
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--czerwien), var(--zloto), var(--czerwien));
+  }
+
+  .gwiazda{
+    font-size: 28px;
+    color: var(--zloto);
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .naglowek-tytul{
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: var(--tekst);
+    text-transform: uppercase;
+  }
+
+  .naglowek-podtytul{
+    margin-top: 10px;
+    font-size: clamp(14px, 2.4vw, 17px);
+    color: var(--zloto-jasne);
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .status-serwera{
+    margin-top: 26px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia);
+    border-radius: 999px;
+    font-size: 14px;
+    color: var(--tekst-przygaszony);
+  }
+
+  .kropka-status{
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--zielony);
+    box-shadow: 0 0 8px var(--zielony);
+    flex-shrink: 0;
+  }
+
+  /* ============================================
+     SEKCJE OGÓLNE
+     ============================================ */
+  .sekcja{
+    margin-top: 48px;
+  }
+
+  .sekcja-tytul{
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--zloto);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--linia);
+  }
+
+  .siatka{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 640px){
+    .siatka{ grid-template-columns: 1fr; }
+  }
+
+  /* ============================================
+     KARTY
+     ============================================ */
+  .karta{
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia);
+    border-radius: 6px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .karta::before{
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--czerwien);
+    border-radius: 6px 0 0 6px;
+  }
+
+  .karta-naglowek{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .karta-etykieta{
+    font-size: 12px;
+    color: var(--tekst-przygaszony);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .karta-imie{
+    font-family: 'Oswald', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--tekst);
+  }
+
+  .karta-status-tekst{
+    font-size: 13px;
+    color: var(--zloto-jasne);
+  }
+
+  .licznik-dni{
+    margin: 18px 0 10px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+    color: var(--tekst);
+  }
+
+  .licznik-dni strong{
+    color: var(--zloto-jasne);
+    font-size: 20px;
+  }
+
+  .pasek-tlo{
+    width: 100%;
+    height: 10px;
+    background: var(--tlo-karta-jasniej);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--linia);
+  }
+
+  .pasek-wypelnienie{
+    height: 100%;
+    background: linear-gradient(90deg, var(--czerwien), var(--zloto));
+    border-radius: 999px;
+    transition: width 0.6s ease;
+  }
+
+  .pasek-podpis{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--tekst-przygaszony);
+  }
+
+  /* ============================================
+     BAZA PRAWNA
+     ============================================ */
+  .karta-prawna{
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia);
+    border-radius: 6px;
+    padding: 26px;
+  }
+
+  .karta-prawna-wiersz{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linia);
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .karta-prawna-wiersz:last-child{ border-bottom: none; }
+
+  .karta-prawna-etykieta{ color: var(--tekst-przygaszony); font-size: 14px; }
+
+  .karta-prawna-wartosc{ color: var(--zloto-jasne); font-weight: 700; font-family: 'Oswald', sans-serif; }
+
+  .znacznik-ok{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--zielony);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* ============================================
+     ODZNACZENIA
+     ============================================ */
+  .lista-odznaczen{
+    background: var(--tlo-karta);
+    border: 1px solid var(--linia);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .odznaczenie{
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--linia);
+  }
+
+  .odznaczenie:last-child{ border-bottom: none; }
+
+  .odznaczenie-brak{
+    padding: 24px 22px;
+    text-align: center;
+    color: var(--tekst-przygaszony);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .odznaczenie-medal{
+    font-size: 22px;
+    color: var(--zloto);
+    flex-shrink: 0;
+  }
+
+  .odznaczenie-imie{
+    font-family: 'Oswald', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--tekst);
+  }
+
+  .odznaczenie-powod{
+    font-size: 13px;
+    color: var(--tekst-przygaszony);
+    margin-top: 2px;
+  }
+
+  .odznaczenie-data{
+    font-size: 12px;
+    color: var(--zloto-jasne);
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  @media (max-width: 480px){
+    .odznaczenie{ grid-template-columns: auto 1fr; }
+    .odznaczenie-data{ grid-column: 2; text-align: left; }
+  }
+
+  /* ============================================
+     STOPKA
+     ============================================ */
+  .stopka{
+    margin-top: 60px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--tekst-przygaszony);
+    padding-top: 24px;
+    border-top: 1px solid var(--linia);
+  }
+
+</style>
+</head>
+<body>
+
+  <header class="naglowek">
+    <span class="gwiazda">★</span>
+    <h1 class="naglowek-tytul">Oficjalny Panel Informacyjny Serwera PRL</h1>
+    <p class="naglowek-podtytul">Centrum Zarządzania i Statystyk</p>
+    <div class="status-serwera">
+      <span class="kropka-status"></span>
+      <span>Serwer Operacyjny</span>
+    </div>
+  </header>
+
+  <div class="kontener">
+
+    <!-- KADENCJE -->
+    <section class="sekcja">
+      <div class="sekcja-tytul">Zegary i Kadencje</div>
+      <div class="siatka">
+
+        <!-- I Sekretarz -->
+        <div class="karta">
+          <div class="karta-naglowek">
+            <span class="karta-etykieta">I Sekretarz</span>
+          </div>
+          <div class="karta-imie" id="imieSekretarza1">—</div>
+          <div class="licznik-dni">
+            Dzień kadencji: <strong id="dzienKadencji1">0</strong> / <span id="dlugoscKadencji1">0</span>
+          </div>
+          <div class="pasek-tlo">
+            <div class="pasek-wypelnienie" id="paskSekretarz1" style="width:0%"></div>
+          </div>
+          <div class="pasek-podpis">
+            <span id="procentSekretarz1">0%</span>
+            <span id="pozostaloSekretarz1">— dni do końca</span>
+          </div>
+        </div>
+
+        <!-- II Sekretarz -->
+        <div class="karta">
+          <div class="karta-naglowek">
+            <span class="karta-etykieta">II Sekretarz</span>
+          </div>
+          <div class="karta-imie" id="imieSekretarza2">—</div>
+          <div class="karta-status-tekst" id="statusSekretarza2">Status kadencji</div>
+          <div class="licznik-dni">
+            Dzień kadencji: <strong id="dzienKadencji2">0</strong> / <span id="dlugoscKadencji2">0</span>
+          </div>
+          <div class="pasek-tlo">
+            <div class="pasek-wypelnienie" id="paskSekretarz2" style="width:0%"></div>
+          </div>
+          <div class="pasek-podpis">
+            <span id="procentSekretarz2">0%</span>
+            <span id="pozostaloSekretarz2">— dni do końca</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BAZA PRAWNA -->
+    <section class="sekcja">
+      <div class="sekcja-tytul">Baza Prawna i Ustawy</div>
+      <div class="karta-prawna">
+        <div class="karta-prawna-wiersz">
+          <span class="karta-prawna-etykieta">Obowiązująca Konstytucja</span>
+          <span class="karta-prawna-wartosc" id="nazwaKonstytucji">—</span>
+        </div>
+        <div class="karta-prawna-wiersz">
+          <span class="karta-prawna-etykieta">Status prawny serwera</span>
+          <span class="znacznik-ok" id="statusPrawny">
+            <span>●</span> W mocy
+          </span>
+        </div>
+        <div class="karta-prawna-wiersz">
+          <span class="karta-prawna-etykieta">Data ostatniej nowelizacji</span>
+          <span class="karta-prawna-wartosc" id="dataNowelizacji">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ODZNACZENIA -->
+    <section class="sekcja">
+      <div class="sekcja-tytul">Rejestr Odznaczeń Państwowych — Order Orła Czerwonego</div>
+      <div class="lista-odznaczen" id="listaOdznaczen">
+        <!-- generowane przez JS -->
+      </div>
+    </section>
+
+    <div class="stopka">
+      Rzeczpospolita PRL — Panel odświeżany automatycznie na żywo
+    </div>
+
+  </div>
+
+<script>
+  /* ============================================================
+     KONFIGURACJA — EDYTUJ TYLKO TE ZMIENNE
+     ============================================================ */
+
+  // --- I SEKRETARZ ---
+  const nazwaSekretarza1     = "Bluetes";
+  const dataStartuKadencji1  = "2026-09-03";   // format: RRRR-MM-DD
+  const dlugoscKadencjiDni1  = 60;             // długość kadencji w dniach
+
+  // --- II SEKRETARZ ---
+  const nazwaSekretarza2     = "Pax";
+  const dataStartuKadencji2  = "2026-09-03";
+  const dlugoscKadencjiDni2  = 60;
+
+  // --- BAZA PRAWNA ---
+  const nazwaKonstytucjiTekst   = "Konstytucja PRL z 2026";
+  const dataNowelizacjiTekst    = "01.08.2026";
+  const statusPrawnyAktywny     = true; // true = "W mocy", false = "Zawieszona"
+
+  // --- REJESTR ODZNACZEŃ ---
+  // Dodaj kolejny wpis kopiując linijkę { ... } poniżej
+  const listaOdznaczonychObywateli = [];
+
+  /* ============================================================
+     LOGIKA — nie trzeba tego ruszać
+     ============================================================ */
+
+  function obliczKadencje(dataStartu, dlugoscDni){
+    const start = new Date(dataStartu + "T00:00:00");
+    const teraz = new Date();
+    const koniec = new Date(start.getTime() + dlugoscDni * 86400000);
+
+    const minelo = Math.floor((teraz - start) / 86400000) + 1;
+    const dzien = Math.max(1, Math.min(dlugoscDni, minelo));
+    const pozostalo = Math.max(0, Math.ceil((koniec - teraz) / 86400000));
+    const procent = Math.max(0, Math.min(100, (dzien / dlugoscDni) * 100));
+    const zakonczona = dzien >= dlugoscDni;
+
+    return { dzien, pozostalo, procent, zakonczona };
+  }
+
+  function ustawKadencje(prefix, imie, dataStartu, dlugoscDni){
+    const dane = obliczKadencje(dataStartu, dlugoscDni);
+
+    document.getElementById("imieSekretarza" + prefix).textContent = imie;
+    document.getElementById("dzienKadencji" + prefix).textContent = dane.dzien;
+    document.getElementById("dlugoscKadencji" + prefix).textContent = dlugoscDni;
+    document.getElementById("paskSekretarz" + prefix).style.width = dane.procent.toFixed(1) + "%";
+    document.getElementById("procentSekretarz" + prefix).textContent = dane.procent.toFixed(0) + "%";
+    document.getElementById("pozostaloSekretarz" + prefix).textContent =
+      dane.zakonczona ? "Trwają wybory" : dane.pozostalo + " dni do końca";
+
+    return dane;
+  }
+
+  function odswiezPanel(){
+    ustawKadencje(1, nazwaSekretarza1, dataStartuKadencji1, dlugoscKadencjiDni1);
+    const dane2 = ustawKadencje(2, nazwaSekretarza2, dataStartuKadencji2, dlugoscKadencjiDni2);
+
+    document.getElementById("statusSekretarza2").textContent =
+      dane2.zakonczona ? "Trwają wybory" : "Kadencja w toku";
+
+    document.getElementById("nazwaKonstytucji").textContent = nazwaKonstytucjiTekst;
+    document.getElementById("dataNowelizacji").textContent = dataNowelizacjiTekst;
+
+    const statusEl = document.getElementById("statusPrawny");
+    statusEl.innerHTML = statusPrawnyAktywny
+      ? "<span>●</span> W mocy"
+      : "<span>●</span> Zawieszona";
+    statusEl.style.color = statusPrawnyAktywny ? "var(--zielony)" : "var(--czerwien-jasna)";
+  }
+
+  function zbudujListeOdznaczen(){
+    const kontener = document.getElementById("listaOdznaczen");
+    kontener.innerHTML = "";
+
+    if (listaOdznaczonychObywateli.length === 0) {
+      kontener.innerHTML = '<div class="odznaczenie-brak">Brak informacji o nadanych odznaczeniach.</div>';
+      return;
+    }
+
+    listaOdznaczonychObywateli.forEach(function(osoba){
+      const wiersz = document.createElement("div");
+      wiersz.className = "odznaczenie";
+      wiersz.innerHTML =
+        '<span class="odznaczenie-medal">★</span>' +
+        '<div>' +
+          '<div class="odznaczenie-imie">' + osoba.imie + '</div>' +
+          '<div class="odznaczenie-powod">' + osoba.powod + '</div>' +
+        '</div>' +
+        '<span class="odznaczenie-data">' + osoba.data + '</span>';
+      kontener.appendChild(wiersz);
+    });
+  }
+
+  // Pierwsze uruchomienie
+  odswiezPanel();
+  zbudujListeOdznaczen();
+
+  // Odświeżanie licznika co minutę (dzień się zmienia raz dziennie, ale to trzyma dane na żywo)
+  setInterval(odswiezPanel, 60000);
+</script>
+
+</body>
+</html>
+

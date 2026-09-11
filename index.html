@@ -517,14 +517,14 @@
      ============================================================ */
 
   // --- I SEKRETARZ ---
-  const nazwaSekretarza1     = "Pax";
-  const dataStartuKadencji1  = "2026-09-06T18:00:00";   // format: RRRR-MM-DDTGG:MM:SS
-  const dlugoscKadencjiDni1  = 60;             // długość kadencji w dniach
+  const nazwaSekretarza1        = "Pax";
+  const dataStartuKadencji1     = "2026-09-06T18:00:00";   // format: RRRR-MM-DDTGG:MM:SS
+  const dlugoscKadencjiMiesiecy1 = 2;             // długość kadencji w miesiącach kalendarzowych
 
   // --- II SEKRETARZ ---
-  const nazwaSekretarza2     = "Devon";
-  const dataStartuKadencji2  = "2026-09-06T18:00:00";
-  const dlugoscKadencjiDni2  = 60;
+  const nazwaSekretarza2        = "Devon";
+  const dataStartuKadencji2     = "2026-09-06T18:00:00";
+  const dlugoscKadencjiMiesiecy2 = 2;
 
   // --- BAZA PRAWNA ---
   const nazwaKonstytucjiTekst   = "Konstytucja PRL z 2026";
@@ -542,9 +542,16 @@
      LOGIKA — nie trzeba tego ruszać
      ============================================================ */
 
-  function obliczKadencje(dataStartu, dlugoscDni){
+  function obliczKadencje(dataStartu, dlugoscMiesiecy){
     const start = new Date(dataStartu);
     const teraz = new Date();
+
+    // koniec kadencji = data startu + X miesięcy kalendarzowych (uwzględnia różną długość miesięcy)
+    const koniec = new Date(start);
+    koniec.setMonth(koniec.getMonth() + dlugoscMiesiecy);
+
+    // pełna długość kadencji w dniach (np. wrzesień+październik = 61 dni)
+    const dlugoscDni = Math.round((koniec - start) / 86400000);
 
     const minelo = Math.floor((teraz - start) / 86400000) + 1;
     const dzien = Math.max(1, Math.min(dlugoscDni, minelo));
@@ -552,15 +559,15 @@
     const procent = Math.max(0, Math.min(100, (dzien / dlugoscDni) * 100));
     const zakonczona = dzien >= dlugoscDni;
 
-    return { dzien, pozostalo, procent, zakonczona };
+    return { dzien, dlugoscDni, pozostalo, procent, zakonczona };
   }
 
-  function ustawKadencje(prefix, imie, dataStartu, dlugoscDni){
-    const dane = obliczKadencje(dataStartu, dlugoscDni);
+  function ustawKadencje(prefix, imie, dataStartu, dlugoscMiesiecy){
+    const dane = obliczKadencje(dataStartu, dlugoscMiesiecy);
 
     document.getElementById("imieSekretarza" + prefix).textContent = imie;
     document.getElementById("dzienKadencji" + prefix).textContent = dane.dzien;
-    document.getElementById("dlugoscKadencji" + prefix).textContent = dlugoscDni;
+    document.getElementById("dlugoscKadencji" + prefix).textContent = dane.dlugoscDni;
     document.getElementById("paskSekretarz" + prefix).style.width = dane.procent.toFixed(1) + "%";
     document.getElementById("procentSekretarz" + prefix).textContent = dane.procent.toFixed(0) + "%";
     document.getElementById("pozostaloSekretarz" + prefix).textContent =
@@ -570,8 +577,8 @@
   }
 
   function odswiezPanel(){
-    ustawKadencje(1, nazwaSekretarza1, dataStartuKadencji1, dlugoscKadencjiDni1);
-    const dane2 = ustawKadencje(2, nazwaSekretarza2, dataStartuKadencji2, dlugoscKadencjiDni2);
+    ustawKadencje(1, nazwaSekretarza1, dataStartuKadencji1, dlugoscKadencjiMiesiecy1);
+    const dane2 = ustawKadencje(2, nazwaSekretarza2, dataStartuKadencji2, dlugoscKadencjiMiesiecy2);
 
     document.getElementById("statusSekretarza2").textContent =
       dane2.zakonczona ? "Trwają wybory" : "Kadencja w toku";

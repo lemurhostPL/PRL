@@ -545,11 +545,10 @@
   function obliczKadencje(dataStartu, dlugoscDni){
     const start = new Date(dataStartu);
     const teraz = new Date();
-    const koniec = new Date(start.getTime() + dlugoscDni * 86400000);
 
     const minelo = Math.floor((teraz - start) / 86400000) + 1;
     const dzien = Math.max(1, Math.min(dlugoscDni, minelo));
-    const pozostalo = Math.max(0, Math.ceil((koniec - teraz) / 86400000));
+    const pozostalo = Math.max(0, dlugoscDni - dzien);
     const procent = Math.max(0, Math.min(100, (dzien / dlugoscDni) * 100));
     const zakonczona = dzien >= dlugoscDni;
 

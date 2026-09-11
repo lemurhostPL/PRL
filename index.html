@@ -517,14 +517,14 @@
      ============================================================ */
 
   // --- I SEKRETARZ ---
-  const nazwaSekretarza1        = "Pax";
-  const dataStartuKadencji1     = "2026-09-06T18:00:00";   // format: RRRR-MM-DDTGG:MM:SS
-  const dlugoscKadencjiMiesiecy1 = 2;             // długość kadencji w miesiącach kalendarzowych
+  const nazwaSekretarza1     = "Pax";
+  const dataStartuKadencji1  = "2026-09-05T00:00:00";   // format: RRRR-MM-DDTGG:MM:SS
+  const dataKoncaKadencji1   = "2026-10-31T23:59:59";   // dokładna data końca kadencji
 
   // --- II SEKRETARZ ---
-  const nazwaSekretarza2        = "Devon";
-  const dataStartuKadencji2     = "2026-09-06T18:00:00";
-  const dlugoscKadencjiMiesiecy2 = 2;
+  const nazwaSekretarza2     = "Devon";
+  const dataStartuKadencji2  = "2026-09-05T00:00:00";
+  const dataKoncaKadencji2   = "2026-10-31T23:59:59";
 
   // --- BAZA PRAWNA ---
   const nazwaKonstytucjiTekst   = "Konstytucja PRL z 2026";
@@ -533,7 +533,13 @@
 
   // --- REJESTR ODZNACZEŃ ---
   // Dodaj kolejny wpis kopiując linijkę { ... } poniżej
-  const listaOdznaczonychObywateli = [];
+  const listaOdznaczonychObywateli = [
+    { imie: "Maloy", powod: "Za utworzenie serwera i ogromną aktywność", data: "" },
+    { imie: "Pas",   powod: "Za bycie z nami od samych początków i dalszego uczestnictwa w życiu serwera", data: "" },
+    { imie: "Devon", powod: "Za rozbudowę serwera i zostanie pierwszą osobą na stanowisku sekretarza po Maloyu", data: "" },
+    { imie: "Pax",   powod: "Za współzałożenie pierwszego serwera i pomaganie w następnych", data: "" },
+    { imie: "Eko",   powod: "Za znaczący udział przy tworzeniu PRL3, dodanie na serwer wielu nowych osób i organizację eventu z pisania konstytucji", data: "" }
+  ];
 
   // --- GŁOSOWANIE ---
   const czyTrwaGlosowanie = false;   // true = pokazuje baner "Trwa głosowanie" nad kartami sekretarzy
@@ -542,28 +548,25 @@
      LOGIKA — nie trzeba tego ruszać
      ============================================================ */
 
-  function obliczKadencje(dataStartu, dlugoscMiesiecy){
+  function obliczKadencje(dataStartu, dataKonca){
     const start = new Date(dataStartu);
+    const koniec = new Date(dataKonca);
     const teraz = new Date();
 
-    // koniec kadencji = data startu + X miesięcy kalendarzowych (uwzględnia różną długość miesięcy)
-    const koniec = new Date(start);
-    koniec.setMonth(koniec.getMonth() + dlugoscMiesiecy);
-
-    // pełna długość kadencji w dniach (np. wrzesień+październik = 61 dni)
+    // pełna długość kadencji w dniach (np. 5.09 - 31.10 = 56 dni)
     const dlugoscDni = Math.round((koniec - start) / 86400000);
 
     const minelo = Math.floor((teraz - start) / 86400000) + 1;
     const dzien = Math.max(1, Math.min(dlugoscDni, minelo));
     const pozostalo = Math.max(0, dlugoscDni - dzien);
     const procent = Math.max(0, Math.min(100, (dzien / dlugoscDni) * 100));
-    const zakonczona = dzien >= dlugoscDni;
+    const zakonczona = teraz >= koniec;
 
     return { dzien, dlugoscDni, pozostalo, procent, zakonczona };
   }
 
-  function ustawKadencje(prefix, imie, dataStartu, dlugoscMiesiecy){
-    const dane = obliczKadencje(dataStartu, dlugoscMiesiecy);
+  function ustawKadencje(prefix, imie, dataStartu, dataKonca){
+    const dane = obliczKadencje(dataStartu, dataKonca);
 
     document.getElementById("imieSekretarza" + prefix).textContent = imie;
     document.getElementById("dzienKadencji" + prefix).textContent = dane.dzien;
@@ -577,8 +580,8 @@
   }
 
   function odswiezPanel(){
-    ustawKadencje(1, nazwaSekretarza1, dataStartuKadencji1, dlugoscKadencjiMiesiecy1);
-    const dane2 = ustawKadencje(2, nazwaSekretarza2, dataStartuKadencji2, dlugoscKadencjiMiesiecy2);
+    ustawKadencje(1, nazwaSekretarza1, dataStartuKadencji1, dataKoncaKadencji1);
+    const dane2 = ustawKadencje(2, nazwaSekretarza2, dataStartuKadencji2, dataKoncaKadencji2);
 
     document.getElementById("statusSekretarza2").textContent =
       dane2.zakonczona ? "Trwają wybory" : "Kadencja w toku";

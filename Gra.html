@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRL do władzy v1.0.4 RESPONSIVE & KEYBIND PATCH</title>
+    <style>
+        :root {
+            --red-prl: #8b0000;
+            --bright-red: #d11a1a;
+            --gold-prl: #d4af37;
+            --bg-dark: #070605;
+            --panel-bg: #120e0c;
+            --text-light: #f0e6d2;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; justify-content: center; align-items: center;
+            user-select: none; overflow: hidden;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 95vw; height: 95vh;
+            max-width: 1280px; max-height: 800px;
+            background: var(--panel-bg);
+            border: 4px solid var(--red-prl);
+            box-shadow: 0 0 50px rgba(139, 0, 0, 0.8), inset 0 0 20px #000;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        #top-status-bar {
+            background: linear-gradient(180deg, #8b0000 0%, #4a0000 100%);
+            color: #fff; padding: 6px 14px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--gold-prl);
+            font-size: 0.82rem; font-weight: bold; z-index: 20; flex-shrink: 0;
+        }
+
+        .time-display {
+            color: var(--gold-prl); background: #000;
+            padding: 4px 10px; border: 1px solid var(--gold-prl);
+            letter-spacing: 1px;
+        }
+
+        #matrix-stats-bar {
+            background: #181210;
+            display: grid; grid-template-columns: repeat(8, 1fr);
+            gap: 4px; padding: 6px 10px;
+            border-bottom: 1px solid #332211;
+            font-size: 0.68rem; text-align: center; z-index: 20; flex-shrink: 0;
+        }
+
+        .stat-card { background: #0d0a08; padding: 4px; border: 1px solid #2a1a0a; }
+        .stat-card label { display: block; color: #a09080; font-size: 0.58rem; margin-bottom: 2px; }
+        .stat-card val { color: var(--gold-prl); font-weight: bold; }
+        .money-card val { color: #55ff55 !important; }
+
+        #objective-hud {
+            position: absolute; top: 15px; left: 15px;
+            background: rgba(10, 5, 5, 0.93);
+            border: 2px solid var(--gold-prl);
+            padding: 10px 14px; z-index: 25; font-size: 0.82rem; max-width: 340px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.9);
+        }
+        #objective-hud header { color: var(--gold-prl); font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid var(--red-prl); padding-bottom: 2px; }
+
+        #canvas-container {
+            position: relative; flex-grow: 1; background: #000; overflow: hidden; width: 100%; height: 100%;
+        }
+
+        canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+
+        .crt-scanlines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.32) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 15;
+        }
+
+        #interact-prompt {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 5, 5, 0.95); color: var(--gold-prl);
+            border: 2px solid var(--gold-prl); padding: 8px 20px;
+            font-weight: bold; font-size: 0.92rem; display: none; z-index: 25;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            letter-spacing: 1px;
+        }
+
+        #journal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(8, 6, 5, 0.97);
+            display: none; flex-direction: column; padding: 25px; z-index: 80;
+            border: 4px double var(--gold-prl); overflow-y: auto;
+        }
+
+        .journal-header {
+            color: var(--gold-prl); font-size: 1.4rem; font-weight: bold;
+            border-bottom: 2px solid var(--red-prl); padding-bottom: 8px; margin-bottom: 15px;
+            display: flex; justify-content: space-between;
+        }
+
+        .journal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .journal-section { background: #140d0a; border: 1px solid var(--red-prl); padding: 12px; }
+        .journal-section h3 { margin-top: 0; color: var(--gold-prl); font-size: 0.95rem; border-bottom: 1px solid #331111; padding-bottom: 4px; }
+
+        #notice-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 5, 5, 0.95); display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 90; padding: 30px;
+        }
+
+        .notice-box {
+            background: #180e0c; border: 3px double var(--gold-prl);
+            max-width: 600px; width: 100%; padding: 25px; text-align: center;
+            box-shadow: 0 0 35px rgba(139, 0, 0, 0.9);
+        }
+
+        .notice-title { color: var(--bright-red); font-size: 1.3rem; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid var(--red-prl); padding-bottom: 6px; }
+        .notice-body { color: var(--text-light); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; text-align: left; }
+        .notice-btn {
+            background: #2b0c0c; color: #fff; border: 1px solid var(--gold-prl);
+            padding: 10px 25px; font-family: inherit; font-size: 0.95rem; cursor: pointer; font-weight: bold;
+        }
+        .notice-btn:hover { background: var(--red-prl); color: var(--gold-prl); }
+
+        #dialog-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 7, 7, 0.96); display: none; flex-direction: column;
+            justify-content: space-between; padding: 25px; z-index: 50;
+            border: 3px double var(--red-prl);
+        }
+
+        #dialog-header { color: var(--gold-prl); font-size: 1.25rem; font-weight: bold; border-bottom: 2px solid var(--red-prl); padding-bottom: 8px; }
+        #dialog-body { font-size: 0.98rem; line-height: 1.6; color: var(--text-light); margin: 15px 0; }
+
+        .money-input-box {
+            display: none; background: #180d0d; border: 1px solid var(--gold-prl);
+            padding: 10px; margin-bottom: 15px; gap: 10px; align-items: center;
+        }
+        .money-input-box input {
+            background: #000; color: #55ff55; border: 1px solid var(--gold-prl);
+            padding: 8px; font-family: inherit; font-weight: bold; width: 150px;
+        }
+
+        #dialog-choices { display: flex; flex-direction: column; gap: 8px; }
+        .choice-btn {
+            background: #2b0c0c; color: #fff; border: 1px solid var(--red-prl);
+            padding: 12px 16px; font-family: inherit; font-size: 0.9rem;
+            cursor: pointer; text-align: left; transition: all 0.2s;
+        }
+        .choice-btn:hover { background: var(--red-prl); color: var(--gold-prl); border-color: var(--gold-prl); }
+
+        #main-menu-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 3, 3, 0.98); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100;
+            border: 4px double var(--red-prl);
+        }
+
+        .menu-title { color: var(--bright-red); font-size: 2.7rem; letter-spacing: 6px; text-shadow: 0 0 25px rgba(209, 26, 26, 0.9); margin-bottom: 5px; }
+        .menu-subtitle { color: var(--gold-prl); font-size: 0.95rem; letter-spacing: 2px; margin-bottom: 35px; }
+        .menu-buttons { display: flex; flex-direction: column; gap: 12px; width: 300px; }
+        .menu-btn {
+            background: #240808; color: var(--text-light); border: 2px solid var(--red-prl);
+            padding: 12px; font-family: inherit; font-size: 0.95rem; font-weight: bold;
+            cursor: pointer; transition: all 0.2s; text-align: center;
+        }
+        .menu-btn:hover { background: var(--red-prl); color: var(--gold-prl); border-color: var(--gold-prl); }
+
+        #bottom-bar {
+            background: #0a0807; padding: 6px; text-align: center; font-size: 0.75rem; color: #8a7a6a; border-top: 1px solid #221100; flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-wrapper">
+    <div id="top-status-bar">
+        <div>ROZDZIAŁ <span id="chapter-num">I</span>: <span id="chapter-title" style="color:var(--gold-prl)">ZWYKŁY DZIAŁACZ</span></div>
+        <div class="time-display" id="clock-display">12 XI 1981 | CZWARTEK | 08:00</div>
+    </div>
+
+    <div id="matrix-stats-bar">
+        <div class="stat-card"><label>POP. LUDU</label><val id="val-poparcie">50%</val></div>
+        <div class="stat-card"><label>WPŁYW KC</label><val id="val-wplyw">10%</val></div>
+        <div class="stat-card"><label>REPUTACJA</label><val id="val-reputacja">50%</val></div>
+        <div class="stat-card"><label>LOJALNOŚĆ MO</label><val id="val-mo">40%</val></div>
+        <div class="stat-card"><label>GOSPODARKA</label><val id="val-gospodarka">35%</val></div>
+        <div class="stat-card"><label>NAPIĘCIE</label><val id="val-napiecie">20%</val></div>
+        <div class="stat-card money-card"><label>PORTFEL PRYW.</label><val id="val-kasa-p">3,000 zł</val></div>
+        <div class="stat-card money-card"><label>BUDŻET KOMITETU</label><val id="val-kasa-k">50,000 zł</val></div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="gameCanvas" width="1040" height="450"></canvas>
+        <div class="crt-scanlines"></div>
+
+        <div id="objective-hud">
+            <header>AKTYWNY CEL (ROZDZIAŁ <span id="hud-chapter">I</span>):</header>
+            <div id="hud-goal-text">Zdobyć 30% wpływu w KC</div>
+            <div style="margin-top:4px; font-size:0.75rem; color:#aaa">POSTĘP: <span id="hud-goal-progress">10 / 30%</span></div>
+        </div>
+
+        <div id="interact-prompt">[E] WEJDŹ / INTERAKCJA</div>
+
+        <div id="notice-modal">
+            <div class="notice-box">
+                <div class="notice-title" id="notice-title">KOMUNIKAT SYSTEMOWY</div>
+                <div class="notice-body" id="notice-body">Treść wiadomości...</div>
+                <button class="notice-btn" onclick="closeNotice()">POTWIERDZAM</button>
+            </div>
+        </div>
+
+        <div id="journal-overlay">
+            <div class="journal-header">
+                <span>DZIENNIK DZIAŁACZA — PRL DO WŁADZY (v1.0.4 Patch)</span>
+                <span style="font-size:0.8rem; color:#aaa; cursor:pointer" onclick="toggleJournal()">[ZAMKNIJ - TAB / ESC]</span>
+            </div>
+            <div class="journal-grid">
+                <div class="journal-section">
+                    <h3>AKTYWNE MISJE I CELE</h3>
+                    <div id="j-missions" style="font-size:0.8rem; line-height:1.4"></div>
+                    <h3 style="margin-top:10px;">POZIOM POPARCIA W FRAKCJACH</h3>
+                    <div id="j-factions" style="font-size:0.8rem; line-height:1.4"></div>
+                </div>
+                <div class="journal-section">
+                    <h3>RELACJE Z PERSONAMI</h3>
+                    <div id="j-npcs" style="font-size:0.8rem; line-height:1.4"></div>
+                    <h3 style="margin-top:10px;">HISTORIA KAMPANII</h3>
+                    <div id="j-log" style="font-size:0.75rem; color:#aaa; max-height:130px; overflow-y:auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-menu-overlay">
+            <div class="menu-title">PRL DO WŁADZY</div>
+            <div class="menu-subtitle">v1.0.4 RESPONSIVE & KEYBIND PATCH</div>
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="startNewGame()">▶ NOWA KAMPANIA</button>
+                <button class="menu-btn" onclick="loadGameSave()">WCZYTAJ ZAPIS</button>
+                <button class="menu-btn" onclick="showAboutInfo()">O SYMULATORZE</button>
+            </div>
+        </div>
+
+        <div id="dialog-modal">
+            <div>
+                <div id="dialog-header">TYTUŁ WĄTKU</div>
+                <div id="dialog-body">Opis wydarzenia...</div>
+
+                <div class="money-input-box" id="money-box">
+                    <span style="color:var(--gold-prl)">KWOTA (ZŁ):</span>
+                    <input type="number" id="dialog-money-field" value="1000" min="100" step="100">
+                </div>
+            </div>
+
+            <div id="dialog-choices"></div>
+        </div>
+    </div>
+
+    <div id="bottom-bar">
+        Sterowanie: <b>A / D</b> lub <b>← / →</b> = Lewo/Prawo | <b>W / S</b> lub <b>↑ / ↓</b> = Głębia Y | <b>E</b> = Interakcja | <b>TAB</b> = Dziennik | <b>ESC</b> = Zamknij
+    </div>
+</div>
+
+<script>
+    const DEBUG_MODE = false;
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const MONTH_NAMES = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+    const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const DAYS_OF_WEEK = ["PONIEDZIAŁEK", "WTOREK", "ŚRODA", "CZWARTEK", "PIĄTEK", "SOBOTA", "NIEDZIELA"];
+
+    const DEFAULT_STATE = {
+        chapter: 1,
+        time: { year: 1981, month: 11, day: 12, hour: 8 },
+        weather: 'snow',
+        stats: {
+            poparcieLudu: 50,
+            wplywKC: 10,
+            reputacja: 50,
+            lojalnoscMO: 40,
+            stanGospodarki: 35,
+            napiecie: 20,
+            kasaPrywatna: 3000,
+            kasaKomitetu: 50000
+        },
+        factions: {
+            centrala: 30,
+            mo: 40,
+            dzialacze: 25,
+            reformatorzy: 20,
+            spoleczenstwo: 50
+        },
+        relationships: {
+            maloy: 35,
+            komendant_mo: 40,
+            dziennikarz: 20,
+            reformator_npc: 25
+        },
+        missions: {
+            m1_analiza: { title: "Afera Raportowa", desc: "Zdecyduj co zrobić z raportem gospodarczym w mieszkaniu.", status: "active", chapter: 1 },
+            m2_sluzby: { title: "Lojalność Służb", desc: "Dofinansuj MO i zdobądź min. 60% lojalności.", status: "locked", chapter: 2 },
+            m3_kryzys: { title: "Przetrwać Kryzys", desc: "Utrzymaj gospodarkę >= 20% i napięcie < 80% przez 5 dni.", status: "locked", chapter: 3 },
+            m4_archiwum: { title: "Tajne Archiwum", desc: "Odkryj tajne archiwum w KC i zdobądź 55% wpływu.", status: "locked", chapter: 4 },
+            m5_sejm: { title: "Plenum Sejmu", desc: "Przejdź do głosu na Sali Plenarnej i wygraj głosowanie.", status: "locked", chapter: 5 }
+        },
+        flags: {
+            przekazalRaportReformatorom: false,
+            przekazalRaportMaloyowi: false,
+            pomoglDziennikarzowi: false,
+            akcjaDziennikarzaWykonana: false,
+            rekomendacjaMalojaWykorzystana: false,
+            odkupWinMalojaWykorzystane: false,
+            zbadalTajneArchiwum: false,
+            dofinansowalMO: false,
+            kryzysPrzetrwanyDni: 0
+        },
+        unlockedMaps: ['dom', 'ulica', 'kc_pzpr'],
+        currentMap: 'dom',
+        journalLog: ["Rozpoczęto oficjalną kampanię w PRL do władzy."],
+        inDialog: false,
+        activeTrigger: null
+    };
+
+    let gameState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+    let player = {
+        x: 250, y: 300,
+        speedX: 3.8, speedY: 2.2,
+        baseWidth: 36, baseHeight: 70,
+        walkAnim: 0,
+        isMoving: false,
+        facing: 'down'
+    };
+
+    let keys = {};
+    window.addEventListener('keydown', e => {
+        const k = e.key.toLowerCase();
+        keys[k] = true;
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'tab', 'escape'].includes(k)) {
+            e.preventDefault();
+        }
+        if (k === 'tab') { toggleJournal(); }
+        if (k === 'escape') { handleEscapeKey(); }
+    });
+    window.addEventListener('keyup', e => {
+        keys[e.key.toLowerCase()] = false;
+    });
+
+    function handleEscapeKey() {
+        const journal = document.getElementById('journal-overlay');
+        const dialog = document.getElementById('dialog-modal');
+        const notice = document.getElementById('notice-modal');
+
+        if (journal.style.display === 'flex') {
+            journal.style.display = 'none';
+        } else if (dialog.style.display === 'flex') {
+            closeDialog();
+        } else if (notice.style.display === 'flex') {
+            closeNotice();
+        }
+    }
+
+    let noticeCallback = null;
+    function showNotice(title, body, callback = null) {
+        playSound('notice');
+        document.getElementById('notice-title').innerText = title;
+        document.getElementById('notice-body').innerHTML = body;
+        document.getElementById('notice-modal').style.display = 'flex';
+        noticeCallback = callback;
+    }
+
+    function closeNotice() {
+        document.getElementById('notice-modal').style.display = 'none';
+        if (noticeCallback) {
+            const cb = noticeCallback;
+            noticeCallback = null;
+            cb();
+        }
+    }
+
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    window.addEventListener('pointerdown', () => { initAudio(); }, { once: true });
+    window.addEventListener('keydown', () => { initAudio(); }, { once: true });
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(750, now);
+            osc.frequency.exponentialRampToValueAtTime(380, now + 0.04);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.04);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(now); osc.stop(now + 0.04);
+        } else if (type === 'door') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(60, now + 0.15);
+            gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(now); osc.stop(now + 0.15);
+        } else if (type === 'notice') {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(520, now);
+            osc.frequency.setValueAtTime(650, now + 0.08);
+            gain.gain.setValueAtTime(0.12, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(now); osc.stop(now + 0.2);
+        }
+    }
+
+    function changeStat(key, amount) {
+        if (key === 'kasaPrywatna' || key === 'kasaKomitetu') {
+            gameState.stats[key] = Math.max(0, gameState.stats[key] + amount);
+            return;
+        }
+        if (key in gameState.stats) {
+            gameState.stats[key] = Math.max(0, Math.min(100, gameState.stats[key] + amount));
+            return;
+        }
+        if (key in gameState.factions) {
+            gameState.factions[key] = Math.max(0, Math.min(100, gameState.factions[key] + amount));
+            return;
+        }
+        if (key in gameState.relationships) {
+            gameState.relationships[key] = Math.max(0, Math.min(100, gameState.relationships[key] + amount));
+        }
+    }
+
+    function applyEffects(effects, flagsToSet = {}) {
+        for (const [key, amount] of Object.entries(effects)) {
+            changeStat(key, amount);
+        }
+        for (const [flag, val] of Object.entries(flagsToSet)) {
+            gameState.flags[flag] = val;
+        }
+    }
+
+    function afterStateChange() {
+        checkMissions();
+        checkChapterGoals();
+        updateUI();
+        saveGame();
+    }
+
+    const maps = {
+        dom: {
+            name: "PRYWATNE MIESZKANIE",
+            type: "wood",
+            bounds: { minX: 50, maxX: 950, minY: 250, maxY: 380 },
+            objects: [
+                { id: 'sejf_dom', name: 'Sejf Szafkowy', x: 120, y: 195, w: 60, h: 50 },
+                { id: 'biurko_dom', name: 'Biurko z Raportami', x: 400, y: 190, w: 110, h: 55 },
+                { id: 'drzwi_dom', name: 'Wyjście na Ulicę', x: 900, y: 185, w: 55, h: 65 }
+            ]
+        },
+        ulica: {
+            name: "ULICA WARSZAWSKA (PRL)",
+            type: "street",
+            bounds: { minX: 50, maxX: 950, minY: 250, maxY: 380 },
+            objects: [
+                { id: 'powrot_dom', name: 'Mieszkanie', x: 60, y: 185, w: 60, h: 65 },
+                { id: 'dziennikarz_npc', name: 'Dziennikarz', x: 280, y: 195, w: 40, h: 50, isNPC: true },
+                { id: 'wejscie_mo', name: 'Komenda MO / ZOMO', x: 550, y: 185, w: 80, h: 65 },
+                { id: 'wejscie_kc', name: 'Gmach KC PZPR', x: 880, y: 185, w: 80, h: 65 }
+            ]
+        },
+        kc_pzpr: {
+            name: "GMACH KC PZPR — HOL",
+            type: "kc",
+            bounds: { minX: 50, maxX: 950, minY: 250, maxY: 380 },
+            objects: [
+                { id: 'wyjscie_kc', name: 'Wyjście na Ulicę', x: 60, y: 185, w: 60, h: 65 },
+                { id: 'maloy_npc', name: 'I Sekretarz Maloy', x: 480, y: 195, w: 40, h: 50, isNPC: true },
+                { id: 'archiwum_kc', name: 'Tajne Archiwum KC', x: 720, y: 195, w: 70, h: 50 },
+                { id: 'drzwi_sejm', name: 'Sala Plenarna Sejmu', x: 900, y: 185, w: 70, h: 65 }
+            ]
+        },
+        komenda_mo: {
+            name: "KOMENDA MILICJI OBYWATELSKIEJ",
+            type: "mo",
+            bounds: { minX: 50, maxX: 950, minY: 250, maxY: 380 },
+            objects: [
+                { id: 'wyjscie_mo', name: 'Wyjście na Ulicę', x: 60, y: 185, w: 60, h: 65 },
+                { id: 'komendant_npc', name: 'Dowódca ZOMO', x: 480, y: 195, w: 40, h: 50, isNPC: true }
+            ]
+        },
+        sala_obrad: {
+            name: "SALA PLENARNA SEJMU",
+            type: "sejm",
+            bounds: { minX: 50, maxX: 950, minY: 250, maxY: 380 },
+            objects: [
+                { id: 'wyjscie_sejm', name: 'Powrót do Holu KC', x: 60, y: 185, w: 60, h: 65 },
+                { id: 'mownica_sejm', name: 'Trybuna Mowników (Głosowanie)', x: 480, y: 195, w: 110, h: 50 }
+            ]
+        }
+    };
+
+    function checkAABBCollision(newX, newY, map) {
+        const pW = player.baseWidth;
+        const pH = player.baseHeight;
+        for (let obj of map.objects) {
+            if (newX < obj.x + obj.w &&
+                newX + pW > obj.x &&
+                newY < obj.y + obj.h &&
+                newY + pH > obj.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function advanceTime(hours) {
+        gameState.time.hour += hours;
+        while (gameState.time.hour >= 24) {
+            gameState.time.hour -= 24;
+            gameState.time.day += 1;
+
+            let maxDays = DAYS_IN_MONTH[gameState.time.month - 1];
+            if (gameState.time.day > maxDays) {
+                gameState.time.day = 1;
+                gameState.time.month += 1;
+                if (gameState.time.month > 12) {
+                    gameState.time.month = 1;
+                    gameState.time.year += 1;
+                }
+            }
+            processDailyTick();
+        }
+        afterStateChange();
+    }
+
+    function processDailyTick() {
+        if (gameState.stats.stanGospodarki < 30) {
+            changeStat('poparcieLudu', -1);
+            changeStat('napiecie', +2);
+            changeStat('spoleczenstwo', -1);
+        }
+        
+        if (gameState.chapter === 3) {
+            if (gameState.stats.stanGospodarki >= 20 && gameState.stats.napiecie < 80) {
+                gameState.flags.kryzysPrzetrwanyDni += 1;
+                addLog(`Utrzymano sytuację w kryzysie (${gameState.flags.kryzysPrzetrwanyDni}/5 dni).`);
+            } else {
+                addLog("Kryzys eskaluje! Wysokie napięcie lub zapaść gospodarki uniemożliwiają opanowanie sytuacji.");
+            }
+        }
+
+        const weatherRand = Math.random();
+        if (weatherRand < 0.5) gameState.weather = 'snow';
+        else if (weatherRand < 0.8) gameState.weather = 'rain';
+        else gameState.weather = 'clear';
+
+        if (gameState.stats.napiecie > 60 && Math.random() < 0.4) {
+            triggerEvent('zamieszki_uliczne');
+        }
+    }
+
+    function triggerEvent(eventId) {
+        if (eventId === 'zamieszki_uliczne') {
+            if (gameState.stats.lojalnoscMO >= 50) {
+                applyEffects({ poparcieLudu: -5, lojalnoscMO: +3, napiecie: -5 });
+                afterStateChange();
+                showNotice("KRYZYS SPOŁECZNY", "Napięcie polityczne doprowadziło do demonstracji! Siły MO zablokowały ulice.");
+            } else {
+                applyEffects({ poparcieLudu: -10, stanGospodarki: -5, napiecie: +10 });
+                afterStateChange();
+                showNotice("WYBUCH ZAMIESZEK", "Służby MO nie zdołały opanować tłumu! Napięcie rośnie, a Gospodarka cierpi.");
+            }
+        }
+    }
+
+    function addLog(msg) {
+        const t = gameState.time;
+        gameState.journalLog.unshift(`${t.day} ${MONTH_NAMES[t.month-1]} — ${msg}`);
+        if (gameState.journalLog.length > 25) gameState.journalLog.pop();
+    }
+
+    function checkMissions() {
+        const m = gameState.missions;
+        if (gameState.chapter >= 2 && m.m2_sluzby.status === 'locked') m.m2_sluzby.status = 'active';
+        if (gameState.chapter >= 3 && m.m3_kryzys.status === 'locked') m.m3_kryzys.status = 'active';
+        if (gameState.chapter >= 4 && m.m4_archiwum.status === 'locked') m.m4_archiwum.status = 'active';
+        if (gameState.chapter >= 5 && m.m5_sejm.status === 'locked') m.m5_sejm.status = 'active';
+
+        if (gameState.flags.przekazalRaportReformatorom || gameState.flags.przekazalRaportMaloyowi) m.m1_analiza.status = 'completed';
+        if (gameState.stats.lojalnoscMO >= 60 && gameState.flags.dofinansowalMO) m.m2_sluzby.status = 'completed';
+        if (gameState.flags.kryzysPrzetrwanyDni >= 5) m.m3_kryzys.status = 'completed';
+        if (gameState.flags.zbadalTajneArchiwum && gameState.stats.wplywKC >= 55) m.m4_archiwum.status = 'completed';
+    }
+
+    function checkChapterGoals() {
+        const ch = gameState.chapter;
+        if (ch === 1 && gameState.stats.wplywKC >= 30) {
+            gameState.chapter = 2;
+            if (!gameState.unlockedMaps.includes('komenda_mo')) gameState.unlockedMaps.push('komenda_mo');
+            addLog("ODBLOKOWANO ROZDZIAŁ II: WALKA O WPŁYWY FRAKCJI!");
+            showNotice("AWANS POLITYCZNY", "Osiągnięto 30% wpływu w KC PZPR! Odblokowano Rozdział II i dostęp do Komendy MO.");
+        } else if (ch === 2 && gameState.stats.lojalnoscMO >= 60 && gameState.factions.mo >= 50 && gameState.flags.dofinansowalMO) {
+            gameState.chapter = 3;
+            addLog("ODBLOKOWANO ROZDZIAŁ III: KRYZYS POLITYCZNY!");
+            showNotice("WEJŚCIE W KRYZYS", "Zbudowano zaplecze w MO. Państwo wchodzi w fazę Kryzysu. Twoim celem jest przetrwać 5 dni przy gospodarce >= 20% i napięciu < 80%.");
+        } else if (ch === 3 && gameState.flags.kryzysPrzetrwanyDni >= 5 && gameState.stats.stanGospodarki >= 20) {
+            gameState.chapter = 4;
+            addLog("ODBLOKOWANO ROZDZIAŁ IV: WALKA O WŁADZĘ!");
+            showNotice("WALKA O WŁADZĘ", "Przetrwano kryzys! Rozdział IV Odblokowany. Musisz zbadać Tajne Archiwum KC oraz zdobyć 55% wpływu!");
+        } else if (ch === 4 && gameState.flags.zbadalTajneArchiwum && gameState.stats.wplywKC >= 55) {
+            gameState.chapter = 5;
+            if (!gameState.unlockedMaps.includes('sala_obrad')) gameState.unlockedMaps.push('sala_obrad');
+            addLog("ODBLOKOWANO ROZDZIAŁ V: FINAŁ W SEJMIE!");
+            showNotice("GOTOWOŚĆ SEJMOWA", "Zbadano archiwum i zbudowano zaplecze! Odblokowano Rozdział V i dostęp do Sali Plenarnej Sejmu!");
+        }
+    }
+
+    function getChapterGoalProgress() {
+        const s = gameState.stats;
+        if (gameState.chapter === 1) return `${s.wplywKC} / 30% Wpływu`;
+        if (gameState.chapter === 2) return `${s.lojalnoscMO} / 60% MO ${gameState.flags.dofinansowalMO ? '[Dofinansowano]' : '[Brak wsparcia MO]'}`;
+        if (gameState.chapter === 3) return `${gameState.flags.kryzysPrzetrwanyDni} / 5 Dni Kryzysu`;
+        if (gameState.chapter === 4) return gameState.flags.zbadalTajneArchiwum ? `${s.wplywKC} / 55% Wpływu` : `Wymagane Tajne Archiwum!`;
+        return "Przejdź do głosu w Sejmie!";
+    }
+
+    function getChapterGoalText() {
+        if (gameState.chapter === 1) return "Zdobyć min. 30% wpływu w KC PZPR.";
+        if (gameState.chapter === 2) return "Zbudować lojalność MO do min. 60%, frakcję MO >= 50% oraz dofinansować patrole.";
+        if (gameState.chapter === 3) return "Przetrwać 5 dni kryzysu (Gospodarka >= 20%, Napięcie < 80%).";
+        if (gameState.chapter === 4) return "Odkryj tajne archiwum w KC i zdobądź min. 55% wpływu.";
+        return "Zdobyć większość w finałowym głosowaniu Sejmu!";
+    }
+
+    function triggerVotingEngine() {
+        const f = gameState.factions;
+        const s = gameState.stats;
+        const fl = gameState.flags;
+
+        gameState.missions.m5_sejm.status = 'completed';
+
+        let totalScore = 0;
+        totalScore += f.centrala * 0.25;
+        totalScore += f.mo * 0.20;
+        totalScore += f.dzialacze * 0.20;
+        totalScore += f.reformatorzy * 0.15;
+        totalScore += f.spoleczenstwo * 0.10;
+        totalScore += (s.reputacja - s.napiecie) * 0.10;
+
+        let endingTitle = "";
+        let endingDesc = "";
+
+        if (totalScore >= 58 && s.poparcieLudu >= 45) {
+            endingTitle = "1. I SEKRETARZ KC PZPR (PEŁNY SUKCES)";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Zostałeś wybawcą Partii i Narodu! Objąłeś pełną władzę w KC z szerokim poparciem aparatu.`;
+        } else if (f.mo >= 65 && s.poparcieLudu < 35) {
+            endingTitle = "2. DYKTATURA MILICYJNA (ZOMO)";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Głosowanie zostało przerwane. Z pomocą sił ZOMO przejąłeś władzę siłą.`;
+        } else if (s.stanGospodarki <= 15) {
+            endingTitle = "3. KATASTROFA GOSPODARCZA";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Gospodarka legła w gruzasch. Puste półki doprowadziły do odwołania Twojej kandydatury.`;
+        } else if (s.poparcieLudu <= 15) {
+            endingTitle = "4. REWOLUCJA I BUNT SPOŁECZNY";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Masowe strajki uniemożliwiły zatwierdzenie wyników. Wybuchł bunt.`;
+        } else if (f.reformatorzy >= 55 && fl.przekazalRaportReformatorom) {
+            endingTitle = "5. WIELKI REFORMATOR PRL";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Sojusz z reformatorami pozwolił Ci przejąć władzę i rozpocząć zmiany rynkowe.`;
+        } else if (s.reputacja >= 65 && f.centrala >= 50) {
+            endingTitle = "6. CZŁOWIEK KOMPROMISU";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Dzięki dyplomacji zyskałeś uznanie zwaśnionych frakcji i fotel I Sekretarza.`;
+        } else if (s.wplywKC >= 60 && gameState.relationships.maloy < 20) {
+            endingTitle = "7. SAMOTNY WŁADCA";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Wyeliminowałeś konkurentów, ale zostałeś w KC kompletnie sam.`;
+        } else {
+            endingTitle = "8. ANONYMOUS APARATCZYK (UPADEK)";
+            endingDesc = `Wynik głosowania: <b>${Math.round(totalScore)}% poparcia</b>.<br>Nie zdołałeś przekonać większości delegatów. Twoja kariera dobiegła końca.`;
+        }
+
+        const reportHTML = `
+            <b>★ RAPORT KOMISJI SKRUTACYJNEJ ★</b><br><br>
+            • Frakcja Centrali: ${f.centrala}%<br>
+            • Frakcja MO / ZOMO: ${f.mo}%<br>
+            • Działacze Terenowi: ${f.dzialacze}%<br>
+            • Frakcja Reformatorów: ${f.reformatorzy}%<br>
+            • Poparcie Społeczne: ${f.spoleczenstwo}%<br><br>
+            <b>${endingTitle}</b><br>${endingDesc}
+        `;
+
+        showNotice("WYNIK PLENARNEGO GŁOSOWANIA", reportHTML, () => {
+            startNewGame();
+        });
+    }
+
+    function getNPCDialog(npcId) {
+        const fl = gameState.flags;
+
+        if (npcId === 'biurko_dom' && (fl.przekazalRaportReformatorom || fl.przekazalRaportMaloyowi)) {
+            return {
+                title: "DĘBOWE BIURKO W MIESZKANIU",
+                body: "Dokumenty na biurku zostały ułożone. Poufny raport gospodarczy został już wcześniej wysłany.",
+                choices: [
+                    {
+                        text: "Odejdź od biurka",
+                        action: () => { afterStateChange(); return true; }
+                    }
+                ]
+            };
+        }
+
+        if (npcId === 'archiwum_kc' && fl.zbadalTajneArchiwum) {
+            return {
+                title: "TAJNE ARCHIWUM KC PZPR",
+                body: "Dokumentacja została już przejrzana. Wszystkie kluczowe teczki znajdują się w Twojej pamięci.",
+                choices: [
+                    {
+                        text: "Zamknij szafę archiwalną",
+                        action: () => { afterStateChange(); return true; }
+                    }
+                ]
+            };
+        }
+
+        if (npcId === 'maloy_npc') {
+            if (fl.przekazalRaportReformatorom) {
+                if (fl.odkupWinMalojaWykorzystane) {
+                    return {
+                        title: "I SEKRETARZ MALOY (CHŁODNY)",
+                        text: "Maloy: 'Sprawa Pana poparcia dla reformatorów została rozliczona wpłatą na KC. Nie oczekujcie dalszych ulg.'",
+                        choices: [
+                            {
+                                text: "Rozumiem, towarzyszu",
+                                action: () => { afterStateChange(); return true; }
+                            }
+                        ]
+                    };
+                }
+                return {
+                    title: "I SEKRETARZ MALOY (PODEJRZLIWY)",
+                    text: "Maloy: 'Towarzyszu, słyszałem, że przekazaliście poufny raport reformatorom! Centrala patrzy Wam na ręce...'",
+                    choices: [
+                        {
+                            text: "Odkup winy i przelej 12,000 zł na projekty KC (+Centrala)",
+                            action: () => {
+                                if (gameState.stats.kasaKomitetu < 12000) { showNotice("BRAK ŚRODKÓW", "Za mały budżet komitetu!"); return false; }
+                                applyEffects(
+                                    { kasaKomitetu: -12000, wplywKC: +10, maloy: +10, centrala: +10 },
+                                    { odkupWinMalojaWykorzystane: true }
+                                );
+                                addLog("Wspomożono fundusz KC.");
+                                advanceTime(2);
+                                return true;
+                            }
+                        }
+                    ]
+                };
+            } else if (fl.przekazalRaportMaloyowi) {
+                if (fl.rekomendacjaMalojaWykorzystana) {
+                    return {
+                        title: "I SEKRETARZ MALOY",
+                        text: "Maloy: 'Udzieliłem wam już rekomendacji, towarzyszu. Bierzcie się do pracy w terenie!'",
+                        choices: [
+                            {
+                                text: "Do widzenia, towarzyszu",
+                                action: () => { afterStateChange(); return true; }
+                            }
+                        ]
+                    };
+                }
+                return {
+                    title: "I SEKRETARZ MALOY (ZADOWOLONY)",
+                    text: "Maloy: 'Dobra robota z tym raportem. Centrala docenia Waszą lojalność w sprawach państwowych.'",
+                    choices: [
+                        {
+                            text: "Poproś o rekomendację polityczną (+15% Wpływu KC)",
+                            action: () => {
+                                applyEffects({ wplywKC: +15, maloy: +5, reputacja: +5 }, { rekomendacjaMalojaWykorzystana: true });
+                                addLog("Otrzymano wsparcie Maloja.");
+                                advanceTime(1);
+                                return true;
+                            }
+                        }
+                    ]
+                };
+            }
+        } else if (npcId === 'dziennikarz_npc' && fl.pomoglDziennikarzowi) {
+            if (fl.akcjaDziennikarzaWykonana) {
+                return {
+                    title: "DZIENNIKARZ (SOJUSZNIK)",
+                    text: "Reporter: 'Towarzyszu, prasa pracuje nad materiałami. Wrócimy do tematu po nowym wydaniu!'",
+                    choices: [
+                        {
+                            text: "Zostaw go w spokoju",
+                            action: () => { afterStateChange(); return true; }
+                        }
+                    ]
+                };
+            }
+            return {
+                title: "DZIENNIKARZ (SOJUSZNIK)",
+                text: "Reporter: 'Towarzyszu! Mój artykuł wywołał poruszenie. Prasa i społeczeństwo stoją za Wami murem.'",
+                choices: [
+                    {
+                        text: "Poproś o serię artykułów o sytuacji rynkowej (+10 Społeczeństwo, +10 Poparcie, +5 Reputacja)",
+                        action: () => {
+                            applyEffects({ spoleczenstwo: +10, poparcieLudu: +10, reputacja: +5 }, { akcjaDziennikarzaWykonana: true });
+                            addLog("Wykorzystano wpływy w prasie.");
+                            advanceTime(2);
+                            return true;
+                        }
+                    }
+                ]
+            };
+        }
+
+        return dialogs[npcId];
+    }
+
+    const dialogs = {
+        sejf_dom: {
+            title: "PRYWATNY SEJF",
+            body: "Przelewaj środki finansowe pomiędzy kontami:",
+            hasMoney: true,
+            choices: [
+                {
+                    text: "Przelej wpisaną kwotę z Portfela do Budżetu Komitetu",
+                    action: (amt) => {
+                        if (amt > gameState.stats.kasaPrywatna) { showNotice("BŁĄD", "Brak środków w portfelu!"); return false; }
+                        applyEffects({
+                            kasaPrywatna: -amt,
+                            kasaKomitetu: +amt,
+                            wplywKC: +Math.floor(amt/1000),
+                            centrala: +2
+                        });
+                        addLog(`Przelano ${amt} zł do Budżetu Komitetu.`);
+                        playSound('click');
+                        advanceTime(1);
+                        return true;
+                    }
+                }
+            ]
+        },
+        biurko_dom: {
+            title: "DĘBOWE BIURKO W MIESZKANIU",
+            body: "Na biurku leży raport z magazynów i spraw gospodarchych.",
+            choices: [
+                {
+                    text: "Przekaż poufne dane reformatorom rynkowym (+Reformatorzy)",
+                    action: () => {
+                        applyEffects({
+                            reformatorzy: +15,
+                            centrala: -10,
+                            reputacja: +5,
+                            stanGospodarki: +5
+                        }, { przekazalRaportReformatorom: true });
+                        addLog("Raport przekazany reformatorom.");
+                        advanceTime(1);
+                        return true;
+                    }
+                },
+                {
+                    text: "Przekaż raport bezpośrednio Maloyowi w KC (+Centrala)",
+                    action: () => {
+                        applyEffects({
+                            centrala: +15,
+                            reformatorzy: -10,
+                            wplywKC: +5,
+                            maloy: +10
+                        }, { przekazalRaportMaloyowi: true });
+                        addLog("Raport przekazany Maloyowi.");
+                        advanceTime(1);
+                        return true;
+                    }
+                }
+            ]
+        },
+        dziennikarz_npc: {
+            title: "SPOTKANIE Z DZIENNIKARZEM PRASY",
+            body: "Reporter: 'Towarzyszu, mam informacje o nieprawidłowościach. Czy pomożecie z publikacją?'",
+            choices: [
+                {
+                    text: "Udziel mu wsparcia i przekaż cynk (+Społeczeństwo, -Centrala)",
+                    action: () => {
+                        applyEffects({
+                            spoleczenstwo: +15,
+                            centrala: -10,
+                            reputacja: +10,
+                            dziennikarz: +20
+                        }, { pomoglDziennikarzowi: true });
+                        addLog("Pomagano dziennikarzowi.");
+                        advanceTime(2);
+                        return true;
+                    }
+                }
+            ]
+        },
+        archiwum_kc: {
+            title: "TAJNE ARCHIWUM KC PZPR",
+            body: "Półki pełne teczek z aktami osobowymi i raportami wywiadu.",
+            choices: [
+                {
+                    text: "Przejrzyj teczki rywali politycznych (+Wpływ KC, +Napięcie)",
+                    action: () => {
+                        if (gameState.chapter < 4) { showNotice("BRAK DOSTĘPU", "Dostęp do archiwum wymaga Rozdziału IV!"); return false; }
+                        applyEffects({
+                            wplywKC: +20,
+                            napiecie: +10,
+                            reputacja: -5
+                        }, { zbadalTajneArchiwum: true });
+                        addLog("Przejrzano tajne archiwum KC.");
+                        advanceTime(3);
+                        return true;
+                    }
+                }
+            ]
+        },
+        maloy_npc: {
+            title: "I SEKRETARZ MALOY",
+            body: "Maloy: 'Towarzyszu, Wasze działania w komitecie wymagają deklaracji!'",
+            choices: [
+                {
+                    text: "Przekaż 10,000 zł z Budżetu na centralne projekty KC (+Centrala)",
+                    action: () => {
+                        if (gameState.stats.kasaKomitetu < 10000) { showNotice("BRAK ŚRODKÓW", "Za mały budżet!"); return false; }
+                        applyEffects({
+                            kasaKomitetu: -10000,
+                            wplywKC: +15,
+                            maloy: +15,
+                            centrala: +10,
+                            poparcieLudu: -2
+                        });
+                        addLog("Wspomożono fundusz KC.");
+                        advanceTime(2);
+                        return true;
+                    }
+                }
+            ]
+        },
+        komendant_npc: {
+            title: "DOWÓDCA ZOMO / MO",
+            text: "Komendant: 'Oddziały potrzebują wsparcia na patrole.'",
+            choices: [
+                {
+                    text: "Przekaż 8,000 zł na patrole MO (+Lojalność MO)",
+                    action: () => {
+                        if (gameState.stats.kasaKomitetu < 8000) { showNotice("BRAK ŚRODKÓW", "Za mały budżet!"); return false; }
+                        applyEffects({
+                            kasaKomitetu: -8000,
+                            lojalnoscMO: +20,
+                            mo: +15,
+                            komendant_mo: +15,
+                            poparcieLudu: -5
+                        }, { dofinansowalMO: true });
+                        addLog("Dofinansowano formacje MO.");
+                        advanceTime(2);
+                        return true;
+                    }
+                }
+            ]
+        },
+        mownica_sejm: {
+            title: "MÓWNICA SEJMOWA — FINAŁ KAMPANII",
+            text: "Rozpoczyna się plenarne głosowanie nad wyborem I Sekretarza.",
+            choices: [
+                {
+                    text: "Zgłoś kandydaturę i przejdź do przeliczenia głosów komisji skrutacyjnej!",
+                    action: () => {
+                        triggerVotingEngine();
+                        return true;
+                    }
+                }
+            ]
+        }
+    };
+
+    function saveGame() {
+        try {
+            gameState.playerPos = { x: player.x, y: player.y };
+            localStorage.setItem("prldowladzy_v1_save", JSON.stringify(gameState));
+        } catch (e) { console.error("Błąd zapisu:", e); }
+    }
+
+    function mergeState(defaultState, savedState) {
+        if (typeof defaultState !== 'object' || defaultState === null) {
+            return savedState;
+        }
+        const result = Array.isArray(defaultState) ? [...defaultState] : { ...defaultState };
+        for (const key of Object.keys(savedState || {})) {
+            if (
+                defaultState[key] &&
+                typeof defaultState[key] === 'object' &&
+                !Array.isArray(defaultState[key]) &&
+                typeof savedState[key] === 'object' &&
+                savedState[key] !== null
+            ) {
+                result[key] = mergeState(defaultState[key], savedState[key]);
+            } else {
+                result[key] = savedState[key];
+            }
+        }
+        return result;
+    }
+
+    function loadGameSave() {
+        try {
+            const saved = localStorage.getItem("prldowladzy_v1_save");
+            if (!saved) {
+                showNotice("BRAK ZAPISU", "Nie znaleziono zapisanej kampanii.");
+                return;
+            }
+            const parsed = JSON.parse(saved);
+            gameState = mergeState(JSON.parse(JSON.stringify(DEFAULT_STATE)), parsed);
+            if (gameState.playerPos) {
+                player.x = gameState.playerPos.x;
+                player.y = gameState.playerPos.y;
+            }
+            document.getElementById('main-menu-overlay').style.display = 'none';
+            afterStateChange();
+            showNotice("WCZYTANO ZAPIS", "Stan gry został pomyślnie odtworzony z automatyczną migracją struktury.");
+        } catch (e) {
+            console.error("Błąd wczytywania zapisu:", e);
+            showNotice("BŁĄD ZAPISU", "Zapis gry był uszkodzony lub niezgodny z aktualną wersją.");
+        }
+    }
+
+    function startNewGame() {
+        gameState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        player.x = 250; player.y = 300;
+        document.getElementById('main-menu-overlay').style.display = 'none';
+        afterStateChange();
+    }
+
+    function showAboutInfo() {
+        showNotice("PRL do władzy v1.0.4 Patch", "Kompletny symulator polityczny. Fizyka kolizji AABB, silnik głosu w Sejmie, oprawa retro Canvas CRT i pełny interfejs responsywny.");
+    }
+
+    function toggleJournal() {
+        playSound('click');
+        const j = document.getElementById('journal-overlay');
+        if (j.style.display === 'flex') {
+            j.style.display = 'none';
+        } else {
+            updateJournalUI();
+            j.style.display = 'flex';
+        }
+    }
+
+    function updateJournalUI() {
+        let mText = "";
+        for (let key in gameState.missions) {
+            let mis = gameState.missions[key];
+            let st = mis.status === 'completed' ? '<span style="color:#55ff55">[UKOŃCZONA]</span>' : mis.status === 'active' ? '<span style="color:var(--gold-prl)">[AKTYWNA]</span>' : '<span style="color:#888">[ZABLOKOWANA]</span>';
+            mText += `• <b>${mis.title}</b> ${st}<br><span style="color:#aaa; font-size:0.75rem">${mis.desc}</span><br>`;
+        }
+        document.getElementById('j-missions').innerHTML = mText;
+
+        let fText = ""; for (let f in gameState.factions) fText += `• ${f.toUpperCase()}: ${gameState.factions[f]}%<br>`;
+        document.getElementById('j-factions').innerHTML = fText;
+
+        let nText = ""; for (let n in gameState.relationships) nText += `• ${n.toUpperCase()}: ${gameState.relationships[n]}%<br>`;
+        document.getElementById('j-npcs').innerHTML = nText;
+
+        document.getElementById('j-log').innerHTML = gameState.journalLog.join('<br>');
+    }
+
+    function update() {
+        if (gameState.inDialog || document.getElementById('main-menu-overlay').style.display !== 'none' || document.getElementById('notice-modal').style.display === 'flex') return;
+
+        const map = maps[gameState.currentMap];
+
+        let moveX = 0, moveY = 0;
+        if (keys['a'] || keys['arrowleft']) moveX -= 1;
+        if (keys['d'] || keys['arrowright']) moveX += 1;
+        if (keys['w'] || keys['arrowup']) moveY -= 1;
+        if (keys['s'] || keys['arrowdown']) moveY += 1;
+
+        if (moveX !== 0 && moveY !== 0) {
+            moveX *= 0.7071;
+            moveY *= 0.7071;
+        }
+
+        if (Math.abs(moveX) > Math.abs(moveY)) {
+            player.facing = moveX > 0 ? 'right' : 'left';
+        } else if (Math.abs(moveY) > 0) {
+            player.facing = moveY > 0 ? 'down' : 'up';
+        }
+
+        let deltaX = moveX * player.speedX;
+        let deltaY = moveY * player.speedY;
+
+        let oldX = player.x;
+        let oldY = player.y;
+
+        let targetX = Math.max(map.bounds.minX, Math.min(map.bounds.maxX, player.x + deltaX));
+        if (!checkAABBCollision(targetX, player.y, map)) {
+            player.x = targetX;
+        }
+
+        let targetY = Math.max(map.bounds.minY, Math.min(map.bounds.maxY, player.y + deltaY));
+        if (!checkAABBCollision(player.x, targetY, map)) {
+            player.y = targetY;
+        }
+
+        let distMoved = Math.hypot(player.x - oldX, player.y - oldY);
+        if (distMoved > 0.05) {
+            player.isMoving = true;
+            player.walkAnim += 0.22;
+        } else {
+            player.isMoving = false;
+            player.walkAnim = 0;
+        }
+
+        let nearestObj = null;
+        let nearestDistance = Infinity;
+
+        map.objects.forEach(obj => {
+            const centerX = obj.x + obj.w / 2;
+            const centerY = obj.y + obj.h / 2;
+            const dist = Math.hypot((player.x + player.baseWidth/2) - centerX, (player.y + player.baseHeight/2) - centerY);
+            if (dist < 95 && dist < nearestDistance) {
+                nearestObj = obj;
+                nearestDistance = dist;
+            }
+        });
+
+        gameState.activeTrigger = nearestObj;
+        const promptEl = document.getElementById('interact-prompt');
+        if (nearestObj) {
+            promptEl.innerText = `[E] ${nearestObj.name.toUpperCase()}`;
+            promptEl.style.display = 'block';
+        } else {
+            promptEl.style.display = 'none';
+        }
+
+        if (keys['e'] && gameState.activeTrigger) {
+            keys['e'] = false;
+            handleInteraction(gameState.activeTrigger);
+        }
+    }
+
+    function handleInteraction(obj) {
+        playSound('click');
+        if (obj.id === 'drzwi_dom') changeMap('ulica', 120, 300);
+        else if (obj.id === 'powrot_dom') changeMap('dom', 850, 300);
+        else if (obj.id === 'wejscie_kc') changeMap('kc_pzpr', 130, 300);
+        else if (obj.id === 'wyjscie_kc') changeMap('ulica', 820, 300);
+        else if (obj.id === 'wejscie_mo') {
+            if (!gameState.unlockedMaps.includes('komenda_mo')) {
+                showNotice("DOSTĘP ZABRONIONY", "Komenda MO jest dostępna od Rozdziału II!");
+                return;
+            }
+            changeMap('komenda_mo', 130, 300);
+        }
+        else if (obj.id === 'wyjscie_mo') changeMap('ulica', 500, 300);
+        else if (obj.id === 'drzwi_sejm') {
+            if (!gameState.unlockedMaps.includes('sala_obrad')) {
+                showNotice("DRZWI ZAMKNIĘTE", "Sala Plenarna Sejmu jest dostępna wyłącznie w finale (Rozdział V)!");
+                return;
+            }
+            changeMap('sala_obrad', 130, 300);
+        }
+        else if (obj.id === 'wyjscie_sejm') changeMap('kc_pzpr', 820, 300);
+        else {
+            openDialog(obj.id);
+        }
+    }
+
+    function changeMap(newMap, startX, startY) {
+        playSound('door');
+        gameState.currentMap = newMap;
+        player.x = startX;
+        player.y = startY;
+        player.isMoving = false;
+        advanceTime(1);
+    }
+
+    function openDialog(dialogId) {
+        gameState.inDialog = true;
+        const data = getNPCDialog(dialogId);
+        
+        if (!data) {
+            gameState.inDialog = false;
+            showNotice("BŁĄD INTERAKCJI", "Nie znaleziono danych dialogowych dla tego obiektu.");
+            return;
+        }
+
+        const modal = document.getElementById('dialog-modal');
+
+        document.getElementById('dialog-header').innerText = data.title;
+        document.getElementById('dialog-body').innerText = data.body || data.text;
+
+        const moneyBox = document.getElementById('money-box');
+        moneyBox.style.display = data.hasMoney ? 'flex' : 'none';
+
+        const choicesDiv = document.getElementById('dialog-choices');
+        choicesDiv.innerHTML = '';
+
+        data.choices.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = c.text;
+            btn.onclick = () => {
+                playSound('click');
+                const amt = parseInt(document.getElementById('dialog-money-field').value) || 0;
+                if (c.action(amt)) {
+                    closeDialog();
+                }
+            };
+            choicesDiv.appendChild(btn);
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    function closeDialog() {
+        gameState.inDialog = false;
+        document.getElementById('dialog-modal').style.display = 'none';
+    }
+
+    function updateUI() {
+        const s = gameState.stats;
+        document.getElementById('val-poparcie').innerText = s.poparcieLudu + '%';
+        document.getElementById('val-wplyw').innerText = s.wplywKC + '%';
+        document.getElementById('val-reputacja').innerText = s.reputacja + '%';
+        document.getElementById('val-mo').innerText = s.lojalnoscMO + '%';
+        document.getElementById('val-gospodarka').innerText = s.stanGospodarki + '%';
+        document.getElementById('val-napiecie').innerText = s.napiecie + '%';
+        document.getElementById('val-kasa-p').innerText = s.kasaPrywatna.toLocaleString() + ' zł';
+        document.getElementById('val-kasa-k').innerText = s.kasaKomitetu.toLocaleString() + ' zł';
+
+        const t = gameState.time;
+        const currentDate = new Date(t.year, t.month - 1, t.day);
+        const dayIdx = (currentDate.getDay() + 6) % 7;
+        const dayName = DAYS_OF_WEEK[dayIdx];
+        const monthName = MONTH_NAMES[t.month - 1];
+        const hStr = (t.hour < 10 ? '0' : '') + t.hour + ':00';
+        document.getElementById('clock-display').innerText = `${t.day} ${monthName} ${t.year} | ${dayName} | ${hStr}`;
+
+        document.getElementById('chapter-num').innerText = getRomanChapter(gameState.chapter);
+        document.getElementById('chapter-title').innerText = getChapterTitle(gameState.chapter);
+        document.getElementById('hud-chapter').innerText = getRomanChapter(gameState.chapter);
+        document.getElementById('hud-goal-text').innerText = getChapterGoalText();
+        document.getElementById('hud-goal-progress').innerText = getChapterGoalProgress();
+    }
+
+    function getRomanChapter(ch) {
+        return ch === 1 ? 'I' : ch === 2 ? 'II' : ch === 3 ? 'III' : ch === 4 ? 'IV' : 'V';
+    }
+
+    function getChapterTitle(ch) {
+        if (ch === 1) return "ZWYKŁY DZIAŁACZ";
+        if (ch === 2) return "WALKA O WPŁYWY";
+        if (ch === 3) return "KRYZYS POLITYCZNY";
+        if (ch === 4) return "WALKA O WŁADZĘ";
+        return "FINAŁ W SEJMIE";
+    }
+
+    function drawVignette() {
+        const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 300, canvas.width/2, canvas.height/2, 600);
+        grad.addColorStop(0, "rgba(0, 0, 0, 0)");
+        grad.addColorStop(1, "rgba(0, 0, 0, 0.65)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawLampGlow(x, y, radius, color) {
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        grad.addColorStop(0, color);
+        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2); ctx.fill();
+    }
+
+    function render() {
+        const map = maps[gameState.currentMap];
+
+        ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (map.type === 'wood') {
+            ctx.fillStyle = "#1e140d"; ctx.fillRect(0, 0, canvas.width, 240);
+            ctx.fillStyle = "#331f13"; ctx.fillRect(0, 240, canvas.width, 210);
+
+            ctx.strokeStyle = "#22130a"; ctx.lineWidth = 1;
+            for(let x=0; x<canvas.width; x+=30) {
+                for(let y=240; y<canvas.height; y+=15) {
+                    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x+15, y+15); ctx.stroke();
+                }
+            }
+            ctx.fillStyle = "#112233"; ctx.fillRect(700, 40, 100, 140);
+            ctx.strokeStyle = "#442b1a"; ctx.lineWidth = 4; ctx.strokeRect(700, 40, 100, 140);
+            ctx.beginPath(); ctx.moveTo(750, 40); ctx.lineTo(750, 180); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(700, 100); ctx.lineTo(800, 100); ctx.stroke();
+
+            ctx.fillStyle = "#2b2b2b"; ctx.fillRect(705, 190, 90, 35);
+            ctx.fillStyle = "#1a1a1a";
+            for(let rx=710; rx<790; rx+=8) ctx.fillRect(rx, 192, 4, 30);
+
+            ctx.fillStyle = "#5c1b1b"; ctx.fillRect(300, 290, 400, 110);
+            ctx.strokeStyle = "#d4af37"; ctx.lineWidth = 2; ctx.strokeRect(304, 294, 392, 102);
+
+        } else if (map.type === 'street') {
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, 140);
+            skyGrad.addColorStop(0, "#080c14"); skyGrad.addColorStop(1, "#18202d");
+            ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, canvas.width, 140);
+
+            ctx.fillStyle = "#101620";
+            ctx.fillRect(80, 20, 140, 120); ctx.fillRect(260, 40, 180, 100);
+            ctx.fillRect(600, 10, 160, 130); ctx.fillRect(800, 30, 150, 110);
+
+            ctx.fillStyle = "#d4af37";
+            ctx.fillRect(100, 40, 12, 16); ctx.fillRect(140, 70, 12, 16);
+            ctx.fillRect(300, 60, 12, 16); ctx.fillRect(360, 90, 12, 16);
+            ctx.fillRect(630, 30, 12, 16); ctx.fillRect(680, 70, 12, 16);
+
+            ctx.fillStyle = "#222a35"; ctx.fillRect(0, 140, canvas.width, 100);
+            ctx.fillStyle = "#2d3846"; ctx.fillRect(0, 240, canvas.width, 210);
+
+            ctx.fillStyle = "#151c24"; ctx.fillRect(0, 236, canvas.width, 8);
+
+            ctx.fillStyle = "#111"; ctx.fillRect(480, 90, 6, 150);
+            drawLampGlow(483, 90, 110, "rgba(255, 200, 100, 0.25)");
+
+            ctx.fillStyle = "#0d131a";
+            ctx.fillRect(720, 220, 130, 35); ctx.fillRect(740, 200, 70, 20);
+            ctx.fillStyle = "#000"; ctx.beginPath(); ctx.arc(745, 255, 12, 0, Math.PI*2); ctx.arc(825, 255, 12, 0, Math.PI*2); ctx.fill();
+
+            ctx.fillStyle = "#8b0000"; ctx.fillRect(300, 20, 300, 24);
+            ctx.strokeStyle = "#ffd700"; ctx.strokeRect(302, 22, 296, 20);
+            ctx.fillStyle = "#fff"; ctx.font = "bold 10px Courier New";
+            ctx.fillText("PARTIA NARODOWI - NARÓD PARTII", 325, 36);
+
+            if (gameState.weather === 'snow') {
+                ctx.fillStyle = "#ffffff";
+                for(let i=0; i<45; i++) {
+                    let rx = (Math.sin(i * 99 + Date.now()*0.001) * 0.5 + 0.5) * canvas.width;
+                    let ry = ((Date.now()*0.06 + i*35) % canvas.height);
+                    ctx.fillRect(rx, ry, 3, 3);
+                }
+            } else if (gameState.weather === 'rain') {
+                ctx.strokeStyle = "#7799bb"; ctx.lineWidth = 1;
+                for(let i=0; i<35; i++) {
+                    let rx = (Math.sin(i * 45 + Date.now()*0.002) * 0.5 + 0.5) * canvas.width;
+                    let ry = ((Date.now()*0.12 + i*20) % canvas.height);
+                    ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 12); ctx.stroke();
+                }
+            }
+        } else if (map.type === 'kc') {
+            ctx.fillStyle = "#1a0808"; ctx.fillRect(0, 0, canvas.width, 240);
+            ctx.fillStyle = "#331212"; ctx.fillRect(0, 240, canvas.width, 210);
+
+            ctx.strokeStyle = "#240a0a";
+            for(let x=0; x<canvas.width; x+=40) {
+                for(let y=240; y<canvas.height; y+=25) {
+                    ctx.strokeRect(x, y, 40, 25);
+                }
+            }
+
+            ctx.fillStyle = "#2b1414";
+            ctx.fillRect(200, 0, 50, 240); ctx.fillRect(790, 0, 50, 240);
+            ctx.fillStyle = "#d4af37";
+            ctx.fillRect(195, 220, 60, 20); ctx.fillRect(785, 220, 60, 20);
+
+            ctx.fillStyle = "#8b0000"; ctx.fillRect(460, 20, 120, 160);
+            ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 3; ctx.strokeRect(462, 22, 116, 156);
+            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(520, 80, 25, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#d4af37"; ctx.fillRect(510, 70, 20, 20);
+
+        } else if (map.type === 'mo') {
+            ctx.fillStyle = "#1e2420"; ctx.fillRect(0, 0, canvas.width, 160);
+            ctx.fillStyle = "#0d1a12"; ctx.fillRect(0, 160, canvas.width, 80);
+            ctx.fillStyle = "#1c221d"; ctx.fillRect(0, 240, canvas.width, 210);
+
+            ctx.fillStyle = "#050a07"; ctx.fillRect(0, 158, canvas.width, 4);
+
+            ctx.fillStyle = "#3a281a"; ctx.fillRect(300, 50, 140, 80);
+            ctx.fillStyle = "#f0e6d2";
+            ctx.fillRect(310, 60, 30, 40); ctx.fillRect(350, 60, 30, 40); ctx.fillRect(390, 60, 30, 40);
+
+        } else {
+            ctx.fillStyle = "#140e0a"; ctx.fillRect(0, 0, canvas.width, 240);
+            ctx.fillStyle = "#2b1b10"; ctx.fillRect(0, 240, canvas.width, 210);
+
+            ctx.fillStyle = "#8b0000"; ctx.fillRect(470, 30, 100, 110);
+            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(520, 75, 28, 0, Math.PI*2); ctx.fill();
+        }
+
+        map.objects.forEach(obj => {
+            ctx.save();
+            if (obj.isNPC) {
+                if (obj.id === 'maloy_npc') {
+                    ctx.fillStyle = "#2a2d32"; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                    ctx.fillStyle = "#f5c29b"; ctx.fillRect(obj.x + 6, obj.y + 6, obj.w - 12, 18);
+                    ctx.fillStyle = "#888888"; ctx.fillRect(obj.x + 4, obj.y + 2, obj.w - 8, 6);
+                    ctx.fillStyle = "#8b0000"; ctx.fillRect(obj.x + 8, obj.y + 28, 6, 6);
+                } else if (obj.id === 'dziennikarz_npc') {
+                    ctx.fillStyle = "#8a7355"; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                    ctx.fillStyle = "#f5c29b"; ctx.fillRect(obj.x + 6, obj.y + 10, obj.w - 12, 16);
+                    ctx.fillStyle = "#544330"; ctx.fillRect(obj.x - 2, obj.y + 2, obj.w + 4, 8);
+                } else {
+                    ctx.fillStyle = "#2b3a4a"; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                    ctx.fillStyle = "#f5c29b"; ctx.fillRect(obj.x + 6, obj.y + 8, obj.w - 12, 16);
+                    ctx.fillStyle = "#1e2833"; ctx.fillRect(obj.x + 2, obj.y + 2, obj.w - 4, 8);
+                    ctx.fillStyle = "#d4af37"; ctx.fillRect(obj.x + 4, obj.y + 24, obj.w - 8, 3);
+                }
+            } else if (obj.id.startsWith('sejf')) {
+                ctx.fillStyle = "#2b2b2b"; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = "#111"; ctx.lineWidth = 3; ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.fillStyle = "#d4af37"; ctx.beginPath(); ctx.arc(obj.x + 30, obj.y + 28, 10, 0, Math.PI*2); ctx.fill();
+            } else if (obj.id.startsWith('biurko')) {
+                ctx.fillStyle = "#3a1f0d"; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.fillStyle = "#113311"; ctx.fillRect(obj.x + 8, obj.y + 4, obj.w - 16, obj.h - 8);
+                ctx.fillStyle = "#ffffff"; ctx.fillRect(obj.x + 15, obj.y + 10, 20, 14);
+                drawLampGlow(obj.x + obj.w - 15, obj.y + 15, 35, "rgba(255, 220, 120, 0.4)");
+            } else {
+                ctx.fillStyle = "#4a1212"; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 2; ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+            }
+            ctx.restore();
+
+            ctx.fillStyle = "#ffffff"; ctx.font = "bold 11px Courier New";
+            ctx.fillText(obj.name, obj.x - 4, obj.y - 8);
+
+            if (DEBUG_MODE) {
+                ctx.strokeStyle = "red"; ctx.lineWidth = 2;
+                ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+            }
+        });
+
+        const scale = 0.75 + ((player.y - 240) / 150) * 0.45;
+        const pW = player.baseWidth * scale;
+        const pH = player.baseHeight * scale;
+
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.beginPath(); ctx.ellipse(player.x + pW/2, player.y + pH - 2, pW/1.2, 7 * scale, 0, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = "#8b0000"; ctx.fillRect(player.x, player.y, pW, pH - (8 * scale));
+
+        if (player.facing === 'down') {
+            ctx.fillStyle = "#f5c29b"; ctx.fillRect(player.x + (4 * scale), player.y + (4 * scale), pW - (8 * scale), 18 * scale);
+            ctx.fillStyle = "#111111"; ctx.fillRect(player.x + (4 * scale), player.y + (2 * scale), pW - (8 * scale), 6 * scale);
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(player.x + (pW/2 - 5*scale), player.y + (22 * scale), 10 * scale, 18 * scale);
+            ctx.fillStyle = "#d4af37"; ctx.fillRect(player.x + (pW/2 - 2*scale), player.y + (22 * scale), 4 * scale, 22 * scale);
+        } else if (player.facing === 'up') {
+            ctx.fillStyle = "#111111"; ctx.fillRect(player.x + (4 * scale), player.y + (2 * scale), pW - (8 * scale), 18 * scale);
+            ctx.fillStyle = "#6b0000"; ctx.fillRect(player.x + (2 * scale), player.y + (18 * scale), pW - (4 * scale), 6 * scale);
+        } else if (player.facing === 'left') {
+            ctx.fillStyle = "#f5c29b"; ctx.fillRect(player.x + (2 * scale), player.y + (4 * scale), pW - (12 * scale), 18 * scale);
+            ctx.fillStyle = "#111111"; ctx.fillRect(player.x + (4 * scale), player.y + (2 * scale), pW - (8 * scale), 6 * scale);
+            ctx.fillStyle = "#d4af37"; ctx.fillRect(player.x + (4 * scale), player.y + (22 * scale), 4 * scale, 18 * scale);
+        } else if (player.facing === 'right') {
+            ctx.fillStyle = "#f5c29b"; ctx.fillRect(player.x + (10 * scale), player.y + (4 * scale), pW - (12 * scale), 18 * scale);
+            ctx.fillStyle = "#111111"; ctx.fillRect(player.x + (4 * scale), player.y + (2 * scale), pW - (8 * scale), 6 * scale);
+            ctx.fillStyle = "#d4af37"; ctx.fillRect(player.x + pW - (8 * scale), player.y + (22 * scale), 4 * scale, 18 * scale);
+        }
+
+        const legOffset = player.isMoving ? Math.sin(player.walkAnim) * (6 * scale) : 0;
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(player.x + (4 * scale), player.y + pH - (8 * scale) + legOffset, 10 * scale, 8 * scale);
+        ctx.fillRect(player.x + pW - (14 * scale), player.y + pH - (8 * scale) - legOffset, 10 * scale, 8 * scale);
+
+        if (DEBUG_MODE) {
+            ctx.strokeStyle = "yellow"; ctx.lineWidth = 2;
+            ctx.strokeRect(player.x, player.y, pW, pH);
+            ctx.fillStyle = "cyan"; ctx.font = "12px monospace";
+            ctx.fillText(`X:${Math.round(player.x)} Y:${Math.round(player.y)} Map:${gameState.currentMap}`, 10, 20);
+        }
+
+        drawVignette();
+    }
+
+    function gameLoop() {
+        update();
+        render();
+        requestAnimationFrame(gameLoop);
+    }
+
+    afterStateChange();
+    gameLoop();
+</script>
+</body>
+</html>
